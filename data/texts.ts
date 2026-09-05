@@ -3,16 +3,16 @@ import { TextMaterial } from '@/types/text';
 export const TEXT_MATERIALS: TextMaterial[] = [
   // --- ENGLISH (EN) ---
   {
-    id: 'en-b1-tech',
+    id: 'en-b1-tech-1',
     title: 'How Artificial Intelligence Works',
     description: 'An introductory guide to basic machine learning concepts and daily application.',
     targetLanguage: 'EN',
     level: 'B1',
     category: 'Technology',
     tagsRu: ['искусственный интеллект', 'нейросети', 'роботы', 'компьютеры', 'технологии', 'ит'],
-    duration: 18.5,
+    duration: 16,
     wordCount: 42,
-    audioUrl: '/audio/en-b1-tech.mp3',
+    audioUrl: '/audio/en-b1-tech-1.mp3',
     sentences: [
       {
         id: 's1',
@@ -35,7 +35,7 @@ export const TEXT_MATERIALS: TextMaterial[] = [
     ]
   },
   {
-    id: 'en-b2-biz',
+    id: 'en-b2-biz-1',
     title: 'The Future of Remote Work Culture',
     description: 'Analyzing performance metrics, async communication, and work-life balance.',
     targetLanguage: 'EN',
@@ -67,7 +67,7 @@ export const TEXT_MATERIALS: TextMaterial[] = [
     ]
   },
   {
-    id: 'en-c1-culture',
+    id: 'en-c1-culture-1',
     title: 'Architectural Heritage and Modern Urbanism',
     description: 'Lectures on preserving historical identity within rapidly expanding metropolises.',
     targetLanguage: 'EN',
@@ -101,7 +101,7 @@ export const TEXT_MATERIALS: TextMaterial[] = [
 
   // --- FRENCH (FR) ---
   {
-    id: 'fr-b1-culture',
+    id: 'fr-b1-culture-1',
     title: 'La Gastronomie Française au Quotidien',
     description: 'Découvrez l’importance des repas traditionnels et des marchés locaux en France.',
     targetLanguage: 'FR',
@@ -133,7 +133,7 @@ export const TEXT_MATERIALS: TextMaterial[] = [
     ]
   },
   {
-    id: 'fr-b2-tech',
+    id: 'fr-b2-tech-1',
     title: 'L’Évolution des Énergies Renouvelables',
     description: 'Une analyse sur la transition énergétique et les nouvelles technologies vertes.',
     targetLanguage: 'FR',
@@ -165,7 +165,7 @@ export const TEXT_MATERIALS: TextMaterial[] = [
     ]
   },
   {
-    id: 'fr-c1-biz',
+    id: 'fr-c1-biz-1',
     title: 'L’Impact de l’Intelligence Artificielle sur l’Économie',
     description: 'Une conférence sur la transformation du marché du travail et la souveraineté numérique.',
     targetLanguage: 'FR',
@@ -199,7 +199,7 @@ export const TEXT_MATERIALS: TextMaterial[] = [
 
   // --- TURKISH (TR) ---
   {
-    id: 'tr-b1-tech',
+    id: 'tr-b1-tech-1',
     title: 'Dijital Dünyada Yeni Teknolojiler',
     description: 'Günlük hayatta kullandığımız akıllı cihazlar ve internetin gelişimi.',
     targetLanguage: 'TR',
@@ -231,7 +231,7 @@ export const TEXT_MATERIALS: TextMaterial[] = [
     ]
   },
   {
-    id: 'tr-b2-culture',
+    id: 'tr-b2-culture-1',
     title: 'İstanbul’un Tarihi ve Mimari Mirası',
     description: 'Doğu ile Batı’nın kesişim noktasındaki kültürel zenginlikler ve şehir kültürü.',
     targetLanguage: 'TR',
@@ -263,12 +263,11 @@ export const TEXT_MATERIALS: TextMaterial[] = [
     ]
   },
   {
-    id: 'tr-c1-biz',
+    id: 'tr-c1-biz-1',
     title: 'Girişimcilik ve Küresel Pazarlar',
     description: 'Uluslararası pazarlara açılma stratejileri ve kriz yönetimi üzerine derinlemesine inceleme.',
     targetLanguage: 'TR',
     level: 'C1',
-    
     category: 'Business',
     tagsRu: ['стартап', 'бизнес', 'инвестиции', 'цифровизация', 'рынок', 'технологии', 'торговля'],
     duration: 22.1,

@@ -3,7 +3,9 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Clock, BookOpen } from 'lucide-react';
+import { ArrowLeft, Clock, BookOpen, Info } from 'lucide-react';
+import { AudioPlayer } from './_components/AudioPlayer';
+import { pluralizeWords } from '@/lib/utils';
 
 interface ReaderPageProps {
   params: Promise<{
@@ -22,9 +24,8 @@ export default async function ReaderPage({ params }: ReaderPageProps) {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 space-y-6 max-w-4xl">
-      {/* Кнопка возврата в каталог */}
-      <Button asChild variant="ghost" size="sm" className="gap-2">
+    <div className="container mx-auto py-2 px-4 space-y-6 max-w-4xl pb-16">
+      <Button asChild variant="ghost" size="sm" className="gap-2 pl-0">
         <Link href="/catalog">
           <ArrowLeft className="w-4 h-4" /> Назад в каталог
         </Link>
@@ -39,25 +40,38 @@ export default async function ReaderPage({ params }: ReaderPageProps) {
         </div>
         <h1 className="text-3xl font-bold tracking-tight">{material.title}</h1>
         <p className="text-muted-foreground">{material.description}</p>
-        
+
         <div className="flex items-center gap-4 text-xs text-muted-foreground pt-2">
           <span className="flex items-center gap-1">
             <Clock className="w-3.5 h-3.5" /> {material.duration} сек.
           </span>
           <span className="flex items-center gap-1">
-            <BookOpen className="w-3.5 h-3.5" /> {material.wordCount} слов
+            <BookOpen className="w-3.5 h-3.5" /> {pluralizeWords(material.wordCount)}
           </span>
         </div>
       </div>
 
-      {/* Заглушка списка предложений (будущий плеер и shadowing-тренажер) */}
+      <div className="flex items-start gap-3 rounded-xl border border-blue-500/20 bg-blue-500/5 px-4 py-3 text-sm text-foreground">
+        <Info className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+
+        <div className="flex flex-col gap-1 leading-relaxed">
+          <p>
+            <strong>Техника Shadowing:</strong> Слушайте диктора и проговаривайте фразы вслух.
+          </p>
+          <p className="text-muted-foreground text-sm">
+            Для отработки речи кликайте по тексту или используйте кнопку <strong>-5s</strong>.
+          </p>
+        </div>
+      </div>
+
+      {/* Список предложений */}
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Предложения и таймкоды:</h2>
+        <h2 className="text-lg font-semibold">Текст материала:</h2>
         <div className="space-y-3">
           {material.sentences.map((s) => (
             <div
               key={s.id}
-              className="p-4 rounded-lg border bg-card text-card-foreground flex flex-col gap-1"
+              className="p-4 rounded-lg border bg-card text-card-foreground flex flex-col gap-1 transition-colors hover:bg-muted/50 cursor-pointer"
             >
               <span className="text-xs font-mono text-muted-foreground">
                 [{s.startTime}s - {s.endTime}s]
@@ -67,6 +81,9 @@ export default async function ReaderPage({ params }: ReaderPageProps) {
           ))}
         </div>
       </div>
+
+      {/* Закрепленный кастомный плеер */}
+      <AudioPlayer audioUrl={material.audioUrl} />
     </div>
   );
 }
