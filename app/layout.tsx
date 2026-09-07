@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Link from 'next/link';
 import { ThemeProvider } from "@/components/ui/theme-provider"
 import { Sidebar } from '@/components/navigation/Sidebar'
 import { BottomNav } from '@/components/navigation/BottomNav'
@@ -18,7 +19,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Polyglot Studio",
-  description: "Изучайте английский, французский и турецкий языки через синхронизированное аудирование, умный словарь и повторение слов.",
+  description: "Изучайте английский, французский и турецкий языки через синхронизированное аудирование, умный словарь и повторение фраз.",
 };
 
 export default function RootLayout({
@@ -46,10 +47,17 @@ export default function RootLayout({
             {/* Основной контентный блок */}
             <div className="md:pl-64 flex flex-col min-h-screen">
               {/* Шапка: название на мобилках + языки и ThemeToggle */}
-              <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur px-4 h-16 flex items-center justify-between md:justify-end">
-                <div className="md:hidden font-bold tracking-tight">
-                  Polyglot Studio
-                </div>
+              <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur px-4 h-16 flex items-center justify-between md:justify-end gap-2 overflow-hidden">
+                <Link
+                  href="/"
+                  className="md:hidden flex items-center gap-2 min-w-0 shrink-0 transition-opacity hover:opacity-80 active:scale-95"
+                >
+                  <div className="h-7 w-7 aspect-square shrink-0 self-center rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm">
+                    P
+                  </div>
+                  <span className="font-bold tracking-tight text-sm leading-tight text-left">Polyglot
+                    <span className="block sm:inline"> Studio</span></span>
+                </Link>
                 <HeaderControls />
               </header>
 

@@ -56,13 +56,20 @@ export function CatalogView({ initialMaterials }: CatalogViewProps) {
   return (
     <div className="space-y-6">
       {/* Поисковая строка и переключатель уровней */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-        <div className="relative w-full sm:w-72">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+      <div className="flex flex-col xl:flex-row gap-4 justify-between items-stretch xl:items-center">
+        <div className="relative w-full xl:max-w-md flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
           <Input
             type="search"
             placeholder="Поиск по темам и русским словам..."
-            className="pl-9"
+            className="hidden sm:block pl-9 pr-4 text-sm w-full"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <Input
+            type="search"
+            placeholder="Поиск по темам и словам..."
+            className="block sm:hidden pl-9 pr-4 text-sm w-full"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -72,28 +79,28 @@ export function CatalogView({ initialMaterials }: CatalogViewProps) {
           defaultValue="ALL"
           value={selectedLevel}
           onValueChange={setSelectedLevel}
-          className="w-full sm:w-auto"
+          className="w-full xl:w-auto shrink-0"
         >
-          <TabsList className="grid w-full grid-cols-4 sm:w-auto">
-            <TabsTrigger value="ALL">Все уровни</TabsTrigger>
-            <TabsTrigger value="B1">B1</TabsTrigger>
-            <TabsTrigger value="B2">B2</TabsTrigger>
-            <TabsTrigger value="C1">C1</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4 xl:w-[360px]">
+            <TabsTrigger value="ALL" className="text-xs sm:text-sm font-medium px-2 cursor-pointer">Все уровни</TabsTrigger>
+            <TabsTrigger value="B1" className="text-xs sm:text-sm cursor-pointer">B1</TabsTrigger>
+            <TabsTrigger value="B2" className="text-xs sm:text-sm cursor-pointer">B2</TabsTrigger>
+            <TabsTrigger value="C1" className="text-xs sm:text-sm cursor-pointer">C1</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
 
       {/* Быстрые чипы категорий */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+      <div className="flex flex-wrap items-center gap-2">
         {CATEGORIES.map((cat) => (
           <Button
             key={cat.id}
             variant={selectedCategory === cat.id ? 'default' : 'outline'}
             size="sm"
             onClick={() => setSelectedCategory(cat.id)}
-            className="rounded-full text-xs shrink-0 cursor-pointer"
+            className="rounded-full text-xs cursor-pointer whitespace-nowrap px-3.5 h-8"
           >
-            <span className="mr-1">{cat.icon}</span>
+            <span className="mr-1.5">{cat.icon}</span>
             {cat.label}
           </Button>
         ))}

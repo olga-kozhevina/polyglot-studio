@@ -1,13 +1,26 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import { TargetLanguage } from '@/store/useSettingsStore';
+
+export interface LastSession {
+  id: string;
+  title: string;
+  level: string;
+  targetLanguage: TargetLanguage;
+}
 
 interface ReaderState {
-  // --- Плеер  ---
+  // --- Последние сессии по языкам (сохраняются в localStorage) ---
+  lastSessionsByLang: Partial<Record<TargetLanguage, LastSession>>;
+  setLastSession: (session: LastSession) => void;
+
+  // --- Состояния аудиоплеера (НЕ сохраняются в localStorage) ---
   isPlaying: boolean;
   currentTime: number;
   duration: number;
   playbackRate: number;
 
-  // --- Синхронизация и ридер  ---
+  // --- Синхронизация и ридер ---
   activeSentenceIndex: number | null;
   isAutoScrollEnabled: boolean;
   isSentenceLoopEnabled: boolean;
@@ -22,22 +35,46 @@ interface ReaderState {
   toggleSentenceLoop: () => void;
 }
 
-export const useReaderStore = create<ReaderState>((set) => ({
-  // Начальные состояния
-  isPlaying: false,
-  currentTime: 0,
-  duration: 0,
-  playbackRate: 1.0,
-  activeSentenceIndex: null,
-  isAutoScrollEnabled: true,
-  isSentenceLoopEnabled: false,
+export const useReaderStore = create<ReaderState>()(
+  persist(
+    (set) => ({
+      // Хранилище сессий по ключам языков: { EN: {...}, FR: {...}, TR: {...} }
+      lastSessionsByLang: {},
 
-  // Методы обновления
-  setIsPlaying: (isPlaying) => set({ isPlaying }),
-  setCurrentTime: (currentTime) => set({ currentTime }),
-  setDuration: (duration) => set({ duration }),
-  setPlaybackRate: (playbackRate) => set({ playbackRate }),
-  setActiveSentenceIndex: (activeSentenceIndex) => set({ activeSentenceIndex }),
-  toggleAutoScroll: () => set((state) => ({ isAutoScrollEnabled: !state.isAutoScrollEnabled })),
-  toggleSentenceLoop: () => set((state) => ({ isSentenceLoopEnabled: !state.isSentenceLoopEnabled })),
-}));
+      // Обновление/добавление сессии для конкретного языка
+      setLastSession: (session) =>
+        set((state) => ({
+          lastSessionsByLang: {
+            ...state.lastSessionsByLang,
+            [session.targetLanguage]: session,
+          },
+        })),
+
+      // Начальные состояния плеера
+      isPlaying: false,
+      currentTime: 0,
+      duration: 0,
+      playbackRate: 1.0,
+      activeSentenceIndex: null,
+      isAutoScrollEnabled: true,
+      isSentenceLoopEnabled: false,
+
+      // Методы обновления плеера
+      setIsPlaying: (isPlaying) => set({ isPlaying }),
+      setCurrentTime: (currentTime) => set({ currentTime }),
+      setDuration: (duration) => set({ duration }),
+      setPlaybackRate: (playbackRate) => set({ playbackRate }),
+      setActiveSentenceIndex: (activeSentenceIndex) => set({ activeSentenceIndex }),
+      toggleAutoScroll: () =>
+        set((state) => ({ isAutoScrollEnabled: !state.isAutoScrollEnabled })),
+      toggleSentenceLoop: () =>
+        set((state) => ({ isSentenceLoopEnabled: !state.isSentenceLoopEnabled })),
+    }),
+    {
+      name: 'polyglot-reader-session',
+      storage: createJSONStorage(() => localStorage),
+      // Сохраняем ТОЛЬКО словарь сессий, чтобы состояние плеера сбрасывалось при перезагрузке
+      partialize: (state) => ({ lastSessionsByLang: state.lastSessionsByLang }),
+    }
+  )
+);
