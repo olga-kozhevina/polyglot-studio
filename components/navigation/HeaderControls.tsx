@@ -1,6 +1,8 @@
 'use client'
 
+import { usePathname, useRouter } from 'next/navigation'
 import { useSettingsStore, TargetLanguage } from '@/store/useSettingsStore'
+import { useReaderStore } from '@/store/useReaderStore'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { Button } from '@/components/ui/button'
 import {
@@ -18,10 +20,29 @@ const TARGET_LANGUAGES: { code: TargetLanguage; label: string }[] = [
 ]
 
 export function HeaderControls() {
+  const router = useRouter()
+  const pathname = usePathname()
+
   const { targetLanguage, setTargetLanguage } = useSettingsStore()
+  const lastSessionsByLang = useReaderStore((state) => state.lastSessionsByLang)
 
   const currentLang =
     TARGET_LANGUAGES.find((lang) => lang.code === targetLanguage) || TARGET_LANGUAGES[0]
+  
+  // Логика умного переключения языка
+  const handleLanguageChange = (newLang: TargetLanguage) => {
+  // 1. Обновляем выбранный язык в Zustand
+  setTargetLanguage(newLang)
+
+  // 2. Если пользователь находился внутри конкретного урока (/reader/[id])
+  // Мы перенаправляем его на главную страницу ридера /reader
+  const isInsideSpecificLesson = pathname.startsWith('/reader/')
+
+  if (isInsideSpecificLesson) {
+    router.push('/reader')
+  }
+
+}
 
   return (
     <div className="flex items-center gap-2 min-[400px]:gap-3 shrink-0">
@@ -48,7 +69,7 @@ export function HeaderControls() {
             {TARGET_LANGUAGES.map((lang) => (
               <DropdownMenuItem
                 key={lang.code}
-                onClick={() => setTargetLanguage(lang.code)}
+                onClick={() => handleLanguageChange(lang.code)}
                 className="cursor-pointer justify-between text-sm"
               >
                 <span>{lang.label}</span>

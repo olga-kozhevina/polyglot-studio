@@ -29,7 +29,7 @@ export const TEXT_MATERIALS: TextMaterial[] = [
       {
         id: 's3',
         startTime: 10.5,
-        endTime: 18.5,
+        endTime: 16,
         text: 'By learning simple algorithms, beginners can understand how modern smart devices operate.'
       }
     ]
@@ -42,26 +42,26 @@ export const TEXT_MATERIALS: TextMaterial[] = [
     level: 'B2',
     category: 'Business',
     tagsRu: ['удаленка', 'работа', 'офис', 'бизнес', 'карьера', 'продуктивность', 'менеджмент'],
-    duration: 21.0,
+    duration: 17.0,
     wordCount: 46,
-    audioUrl: '/audio/en-b2-biz.mp3',
+    audioUrl: '/audio/en-b2-biz-1.mp3',
     sentences: [
       {
         id: 's1',
         startTime: 0.0,
-        endTime: 6.8,
+        endTime: 5.5,
         text: 'Transitioning to distributed teams requires transparent async communication protocols.'
       },
       {
         id: 's2',
-        startTime: 7.2,
-        endTime: 13.5,
+        startTime: 6.0,
+        endTime: 11.2,
         text: 'Companies must focus on measurable outcomes rather than tracking active screen hours.'
       },
       {
         id: 's3',
-        startTime: 14.0,
-        endTime: 21.0,
+        startTime: 11.9,
+        endTime: 17.0,
         text: 'Sustainable remote culture relies heavily on psychological safety and clear boundaries.'
       }
     ]
@@ -74,26 +74,26 @@ export const TEXT_MATERIALS: TextMaterial[] = [
     level: 'C1',
     category: 'Culture',
     tagsRu: ['архитектура', 'история', 'город', 'культура', 'достопримечательности', 'строительство'],
-    duration: 23.4,
+    duration: 21.0,
     wordCount: 45,
-    audioUrl: '/audio/en-c1-culture.mp3',
+    audioUrl: '/audio/en-c1-culture-1.mp3',
     sentences: [
       {
         id: 's1',
         startTime: 0.0,
-        endTime: 7.5,
+        endTime: 5.8,
         text: 'The dichotomy between historical preservation and aggressive urban development triggers fierce debates.'
       },
       {
         id: 's2',
-        startTime: 8.0,
-        endTime: 15.2,
+        startTime: 6.1,
+        endTime: 13.0,
         text: 'Metropolises often struggle to seamlessly integrate centuries-old landmarks with contemporary infrastructure.'
       },
       {
         id: 's3',
-        startTime: 15.8,
-        endTime: 23.4,
+        startTime: 13.5,
+        endTime: 21.0,
         text: 'Preserving intangible cultural heritage demands adaptive reuse strategies rather than mere museumification.'
       }
     ]
@@ -108,26 +108,26 @@ export const TEXT_MATERIALS: TextMaterial[] = [
     level: 'B1',
     category: 'Culture',
     tagsRu: ['кухня', 'еда', 'гастрономия', 'традиции', 'франция', 'париж', 'продукты'],
-    duration: 17.8,
+    duration: 12.0,
     wordCount: 38,
-    audioUrl: '/audio/fr-b1-culture.mp3',
+    audioUrl: '/audio/fr-b1-culture-1.mp3',
     sentences: [
       {
         id: 's1',
         startTime: 0.0,
-        endTime: 5.1,
+        endTime: 4.0,
         text: 'En France, la nourriture est une partie essentielle de la vie quotidienne.'
       },
       {
         id: 's2',
-        startTime: 5.5,
-        endTime: 11.3,
+        startTime: 4.2,
+        endTime: 7.0,
         text: 'Les gens aiment acheter des produits frais au marché le weekend.'
       },
       {
         id: 's3',
-        startTime: 11.8,
-        endTime: 17.8,
+        startTime: 7.2,
+        endTime: 12.0,
         text: 'Partager un repas en famille reste une tradition très importante pour beaucoup.'
       }
     ]
@@ -140,26 +140,26 @@ export const TEXT_MATERIALS: TextMaterial[] = [
     level: 'B2',
     category: 'Technology',
     tagsRu: ['зеленая энергия', 'экология', 'технологии', 'солнце', 'ветер', 'электричество', 'европа'],
-    duration: 20.2,
+    duration: 14.1,
     wordCount: 41,
-    audioUrl: '/audio/fr-b2-tech.mp3',
+    audioUrl: '/audio/fr-b2-tech-1.mp3',
     sentences: [
       {
         id: 's1',
         startTime: 0.0,
-        endTime: 6.2,
+        endTime: 3.2,
         text: 'La transition vers des sources d’énergie propres accélère dans toute l’Europe.'
       },
       {
         id: 's2',
-        startTime: 6.8,
-        endTime: 13.0,
+        startTime: 3.8,
+        endTime: 8.1,
         text: 'Les innovations dans le stockage par batterie permettent de mieux gérer l’intermittence.'
       },
       {
         id: 's3',
-        startTime: 13.5,
-        endTime: 20.2,
+        startTime: 8.5,
+        endTime: 14.1,
         text: 'Investir dans les technologies vertes devient indispensable pour réduire l’empreinte carbone.'
       }
     ]
@@ -174,24 +174,24 @@ export const TEXT_MATERIALS: TextMaterial[] = [
     tagsRu: ['переработка', 'бизнес', 'экология', 'экономика', 'производство', 'вторсырье', 'промышленность'],
     duration: 24.5,
     wordCount: 48,
-    audioUrl: '/audio/fr-c1-biz.mp3',
+    audioUrl: '/audio/fr-c1-biz-1.mp3',
     sentences: [
       {
         id: 's1',
         startTime: 0.0,
-        endTime: 7.8,
+        endTime: 5.9,
         text: 'L’automatisation progressive des processus décisionnels bouleverse fondamentalement les modèles économiques traditionnels.'
       },
       {
         id: 's2',
-        startTime: 8.2,
-        endTime: 16.0,
+        startTime: 6.2,
+        endTime: 12.1,
         text: 'Les entreprises doivent faire face à des enjeux éthiques majeurs tout en garantissant la compétitivité internationale.'
       },
       {
         id: 's3',
-        startTime: 16.5,
-        endTime: 24.5,
+        startTime: 12.8,
+        endTime: 18.0,
         text: 'La régulation des données massives constitue désormais un levier stratégique pour la souveraineté industrielle.'
       }
     ]
@@ -206,26 +206,26 @@ export const TEXT_MATERIALS: TextMaterial[] = [
     level: 'B1',
     category: 'Technology',
     tagsRu: ['чай', 'кофе', 'стамбул', 'турция', 'традиции', 'культура', 'гостеприимство', 'напитки'],
-    duration: 16.5,
+    duration: 16.1,
     wordCount: 34,
-    audioUrl: '/audio/tr-b1-tech.mp3',
+    audioUrl: '/audio/tr-b1-tech-1.mp3',
     sentences: [
       {
         id: 's1',
         startTime: 0.0,
-        endTime: 5.0,
+        endTime: 3.3,
         text: 'Teknoloji her geçen gün hayatımızı daha da kolaylaştırıyor.'
       },
       {
         id: 's2',
-        startTime: 5.4,
-        endTime: 10.8,
+        startTime: 4.0,
+        endTime: 10.1,
         text: 'Akıllı telefonlar sayesinde bilgiye ulaşmak artık sadece birkaç saniye sürüyor.'
       },
       {
         id: 's3',
-        startTime: 11.2,
-        endTime: 16.5,
+        startTime: 11.0,
+        endTime: 16.1,
         text: 'İnternet kullanımı, insanların iletişim kurma biçimini tamamen değiştirdi.'
       }
     ]
@@ -238,26 +238,26 @@ export const TEXT_MATERIALS: TextMaterial[] = [
     level: 'B2',
     category: 'Culture',
     tagsRu: ['умный город', 'транспорт', 'автобус', 'трафик', 'технологии', 'метро', 'автоматизация'],
-    duration: 19.8,
+    duration: 19.5,
     wordCount: 41,
-    audioUrl: '/audio/tr-b2-culture.mp3',
+    audioUrl: '/audio/tr-b2-culture-1.mp3',
     sentences: [
       {
         id: 's1',
         startTime: 0.0,
-        endTime: 6.2,
+        endTime: 5.5,
         text: 'İstanbul, yüzyıllar boyunca farklı medeniyetlere ev sahipliği yapmış eşsiz bir şehirdir.'
       },
       {
         id: 's2',
-        startTime: 6.6,
-        endTime: 13.1,
+        startTime: 6.1,
+        endTime: 11.9,
         text: 'Boğaz’ın iki yakasındaki tarihi yapılar, geçmiş ile günümüz arasında bir köprü kurar.'
       },
       {
         id: 's3',
-        startTime: 13.5,
-        endTime: 19.8,
+        startTime: 12.3,
+        endTime: 19.5,
         text: 'Şehrin kültürel çeşitliliği, hem mimaride hem de günlük yaşam alışkanlıklarında belirgin şekilde hissedilir.'
       }
     ]
@@ -270,26 +270,26 @@ export const TEXT_MATERIALS: TextMaterial[] = [
     level: 'C1',
     category: 'Business',
     tagsRu: ['стартап', 'бизнес', 'инвестиции', 'цифровизация', 'рынок', 'технологии', 'торговля'],
-    duration: 22.1,
+    duration: 20.0,
     wordCount: 39,
-    audioUrl: '/audio/tr-c1-biz.mp3',
+    audioUrl: '/audio/tr-c1-biz-1.mp3',
     sentences: [
       {
         id: 's1',
         startTime: 0.0,
-        endTime: 7.1,
+        endTime: 6.2,
         text: 'Küresel pazarlarda rekabet edebilmek için sürdürülebilir inovasyon stratejileri geliştirmek şarttır.'
       },
       {
         id: 's2',
-        startTime: 7.5,
-        endTime: 14.3,
+        startTime: 7.0,
+        endTime: 13.0,
         text: 'Girişimcilerin finansal riskleri doğru analiz edip esnek kriz yönetim modelleri uygulaması gerekir.'
       },
       {
         id: 's3',
-        startTime: 14.8,
-        endTime: 22.1,
+        startTime: 13.8,
+        endTime: 20.0,
         text: 'Pazar dinamiklerine hızlı uyum sağlayan ölçeklenebilir şirketler uzun vadede başarıyı yakalar.'
       }
     ]

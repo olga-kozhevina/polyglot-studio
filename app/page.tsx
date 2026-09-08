@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { HeroTitle } from '@/components/home/hero-title';
 import {
   Mic,
   Headphones,
@@ -16,7 +17,6 @@ import {
 export default function Home() {
   return (
     <div className="flex flex-col gap-14 py-6 md:py-10 max-w-5xl mx-auto px-4">
-
       <section className="flex flex-col items-center text-center space-y-6 pt-4">
         <Badge
           variant="secondary"
@@ -26,13 +26,7 @@ export default function Home() {
           Платформа для практики иностранных языков
         </Badge>
 
-        <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight max-w-3xl leading-[1.15] text-foreground">
-          Говорите на иностранном языке{' '}
-          <span className="bg-linear-to-r from-blue-600 via-indigo-500 to-cyan-500 bg-clip-text text-transparent">
-            уверенно и бегло
-          </span>
-        </h1>
-
+        <HeroTitle />
 
         <div className="flex flex-col gap-1.5 max-w-2xl text-base sm:text-lg leading-relaxed border-l-2 border-blue-500 pl-4 text-left">
           <p className="text-foreground font-medium">

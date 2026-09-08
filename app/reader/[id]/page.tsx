@@ -34,9 +34,9 @@ export default async function ReaderPage({ params }: ReaderPageProps) {
       }}
     >
       <div className="container mx-auto py-2 px-4 space-y-6 max-w-4xl pb-16">
-        <Button asChild variant="ghost" size="sm" className="gap-2 pl-0">
-          <Link href="/catalog">
-            <ArrowLeft className="w-4 h-4" /> Назад в каталог
+        <Button asChild variant="ghost" size="sm" className="gap-2 pl-0 px-3 border border-border/60 bg-muted/30 hover:bg-muted hover:border-border transition-all rounded-lg cursor-pointer">
+          <Link href="/reader">
+            <ArrowLeft className="w-4 h-4" /> В меню тренировок
           </Link>
         </Button>
 
