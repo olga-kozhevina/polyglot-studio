@@ -2,7 +2,6 @@
 
 import { usePathname, useRouter } from 'next/navigation'
 import { useSettingsStore, TargetLanguage } from '@/store/useSettingsStore'
-import { useReaderStore } from '@/store/useReaderStore'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { Button } from '@/components/ui/button'
 import {
@@ -24,7 +23,6 @@ export function HeaderControls() {
   const pathname = usePathname()
 
   const { targetLanguage, setTargetLanguage } = useSettingsStore()
-  const lastSessionsByLang = useReaderStore((state) => state.lastSessionsByLang)
 
   const currentLang =
     TARGET_LANGUAGES.find((lang) => lang.code === targetLanguage) || TARGET_LANGUAGES[0]

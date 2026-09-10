@@ -17,12 +17,12 @@ export const TEXT_MATERIALS: TextMaterial[] = [
       {
         id: 's1',
         startTime: 0.0,
-        endTime: 4.2,
+        endTime: 4.7,
         text: 'Artificial intelligence is changing the way we live and work every single day.'
       },
       {
         id: 's2',
-        startTime: 4.5,
+        startTime: 5.0,
         endTime: 10.1,
         text: 'Computers can now process large amounts of data to find patterns and make predictions.'
       },
@@ -60,7 +60,7 @@ export const TEXT_MATERIALS: TextMaterial[] = [
       },
       {
         id: 's3',
-        startTime: 11.9,
+        startTime: 11.5,
         endTime: 17.0,
         text: 'Sustainable remote culture relies heavily on psychological safety and clear boundaries.'
       }
@@ -115,18 +115,18 @@ export const TEXT_MATERIALS: TextMaterial[] = [
       {
         id: 's1',
         startTime: 0.0,
-        endTime: 4.0,
+        endTime: 4.2,
         text: 'En France, la nourriture est une partie essentielle de la vie quotidienne.'
       },
       {
         id: 's2',
-        startTime: 4.2,
-        endTime: 7.0,
+        startTime: 4.5,
+        endTime: 7.5,
         text: 'Les gens aiment acheter des produits frais au marché le weekend.'
       },
       {
         id: 's3',
-        startTime: 7.2,
+        startTime: 7.8,
         endTime: 12.0,
         text: 'Partager un repas en famille reste une tradition très importante pour beaucoup.'
       }
@@ -153,12 +153,12 @@ export const TEXT_MATERIALS: TextMaterial[] = [
       {
         id: 's2',
         startTime: 3.8,
-        endTime: 8.1,
+        endTime: 8.7,
         text: 'Les innovations dans le stockage par batterie permettent de mieux gérer l’intermittence.'
       },
       {
         id: 's3',
-        startTime: 8.5,
+        startTime: 9.0,
         endTime: 14.1,
         text: 'Investir dans les technologies vertes devient indispensable pour réduire l’empreinte carbone.'
       }
@@ -179,18 +179,18 @@ export const TEXT_MATERIALS: TextMaterial[] = [
       {
         id: 's1',
         startTime: 0.0,
-        endTime: 5.9,
+        endTime: 6.3,
         text: 'L’automatisation progressive des processus décisionnels bouleverse fondamentalement les modèles économiques traditionnels.'
       },
       {
         id: 's2',
-        startTime: 6.2,
-        endTime: 12.1,
+        startTime: 6.7,
+        endTime: 12.5,
         text: 'Les entreprises doivent faire face à des enjeux éthiques majeurs tout en garantissant la compétitivité internationale.'
       },
       {
         id: 's3',
-        startTime: 12.8,
+        startTime: 13.3,
         endTime: 18.0,
         text: 'La régulation des données massives constitue désormais un levier stratégique pour la souveraineté industrielle.'
       }
@@ -224,7 +224,7 @@ export const TEXT_MATERIALS: TextMaterial[] = [
       },
       {
         id: 's3',
-        startTime: 11.0,
+        startTime: 10.7,
         endTime: 16.1,
         text: 'İnternet kullanımı, insanların iletişim kurma biçimini tamamen değiştirdi.'
       }

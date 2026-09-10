@@ -67,6 +67,9 @@ export const AudioPlayer = ({ audioUrl }: AudioPlayerProps) => {
     useEffect(() => {
         if (audioRef.current) {
             audioRef.current.playbackRate = playbackRate;
+            if ('preservesPitch' in audioRef.current) {
+      audioRef.current.preservesPitch = true;
+    }
         }
     }, [playbackRate]);
 
@@ -103,6 +106,8 @@ export const AudioPlayer = ({ audioUrl }: AudioPlayerProps) => {
                 ref={audioRef}
                 src={audioUrl}
                 preload="auto"
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
                 onTimeUpdate={() => audioRef.current && setCurrentTime(audioRef.current.currentTime)}
                 onLoadedMetadata={() => audioRef.current && setDuration(audioRef.current.duration)}
                 onEnded={() => setIsPlaying(false)}

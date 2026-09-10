@@ -7,6 +7,7 @@ import { ArrowLeft, Clock, BookOpen, Info } from 'lucide-react';
 import { AudioPlayer } from './_components/AudioPlayer';
 import { pluralizeWords } from '@/lib/utils';
 import { ReaderClientWrapper } from './_components/ReaderClientWrapper';
+import { TextContent } from './_components/TextContent';
 
 interface ReaderPageProps {
   params: Promise<{
@@ -73,23 +74,8 @@ export default async function ReaderPage({ params }: ReaderPageProps) {
           </div>
         </div>
 
-        {/* Список предложений */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold">Текст материала:</h2>
-          <div className="space-y-3">
-            {material.sentences.map((s) => (
-              <div
-                key={s.id}
-                className="p-4 rounded-lg border bg-card text-card-foreground flex flex-col gap-1 transition-colors hover:bg-muted/50 cursor-pointer"
-              >
-                <span className="text-xs font-mono text-muted-foreground">
-                  [{s.startTime}s - {s.endTime}s]
-                </span>
-                <p className="text-base">{s.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Интерактивный текст материала с синхронизацией и авто-скроллом */}
+        <TextContent sentences={material.sentences} />
 
         {/* Закрепленный кастомный плеер */}
         <AudioPlayer audioUrl={material.audioUrl} />
