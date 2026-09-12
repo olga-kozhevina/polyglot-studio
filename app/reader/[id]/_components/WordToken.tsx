@@ -7,15 +7,21 @@ import { Button } from '@/components/ui/button';
 import { fetchTranslation } from '@/lib/translate';
 import { useVocabularyStore } from '@/store/useVocabularyStore';
 import { useAuthStore } from '@/store/useAuthStore';
-import { Check, Plus, Loader2 } from 'lucide-react';
+import { useReaderStore } from '@/store/useReaderStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
+import { Check, Plus, Loader2, X } from 'lucide-react';
 
 interface WordTokenProps {
+    tokenId: string;
     word: string;
-    sourceLang: string;
     fullSentence: string;
 }
 
-export function WordToken({ word, sourceLang, fullSentence }: WordTokenProps) {
+export function WordToken({ tokenId, word, fullSentence }: WordTokenProps) {
+    const targetLanguage = useSettingsStore((state) => state.targetLanguage);
+    const activePopoverId = useReaderStore((state) => state.activePopoverId);
+    const setActivePopoverId = useReaderStore((state) => state.setActivePopoverId);
+
     const [translation, setTranslation] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
     const [isAuthDialogOpen, setIsAuthDialogOpen] = useState<boolean>(false);
@@ -24,19 +30,26 @@ export function WordToken({ word, sourceLang, fullSentence }: WordTokenProps) {
     const { isAuthenticated, login } = useAuthStore();
     const { addItem, hasItem } = useVocabularyStore();
 
+    const isOpen = activePopoverId === tokenId;
     const isSaved = hasItem(cleanWord);
 
-    const handleOpenPopover = async (open: boolean) => {
-        // Если пользователь выделяет текст мышкой — не открываем окно отдельного слова
+    const handleOpenChange = async (open: boolean) => {
+        // Если пользователь выделяет несколько слов — игнорируем одиночный Popover
         const selection = window.getSelection();
-        if (selection && selection.toString().trim().length > 0) {
+        if (selection && selection.toString().trim().length > 1 && selection.toString().trim().includes(' ')) {
             return;
         }
-        if (open && !translation && cleanWord) {
-            setLoading(true);
-            const res = await fetchTranslation(cleanWord, sourceLang, 'ru');
-            setTranslation(res);
-            setLoading(false);
+
+        if (open) {
+            setActivePopoverId(tokenId);
+            if (!translation && cleanWord) {
+                setLoading(true);
+                const res = await fetchTranslation(cleanWord, targetLanguage, 'ru');
+                setTranslation(res);
+                setLoading(false);
+            }
+        } else {
+            if (isOpen) setActivePopoverId(null);
         }
     };
 
@@ -52,7 +65,7 @@ export function WordToken({ word, sourceLang, fullSentence }: WordTokenProps) {
                 original: cleanWord,
                 translation: translation || '—',
                 contextSentence: fullSentence,
-                sourceLang,
+                sourceLang: targetLanguage,
                 targetLang: 'ru',
             });
         }
@@ -60,18 +73,40 @@ export function WordToken({ word, sourceLang, fullSentence }: WordTokenProps) {
 
     return (
         <>
-            <Popover onOpenChange={handleOpenPopover}>
+            <Popover open={isOpen} onOpenChange={handleOpenChange}>
                 <PopoverTrigger asChild>
-                    <span onClick={(e) => e.stopPropagation()}
-                        className="cursor-pointer hover:bg-primary/20 hover:text-primary rounded px-0.5 transition-colors">
-                        {word}{' '}
+                    <span
+                        onClick={(e) => {
+                            // ВАЖНО: Останавливаем всплытие, чтобы клик по слову НЕ запускал аудио у предложения
+                            e.stopPropagation();
+                        }}
+                        className="cursor-pointer hover:bg-primary/20 hover:text-primary rounded px-0.5 transition-colors inline font-medium"
+                    >
+                        {word}
                     </span>
                 </PopoverTrigger>
-                <PopoverContent className="w-64 p-3 shadow-md" side="top">
+                <PopoverContent className="w-64 p-3 shadow-md" side="top" align="center">
                     <div className="space-y-2">
                         <div className="flex items-center justify-between border-b pb-1">
-                            <span className="font-semibold text-sm">{cleanWord}</span>
-                            <span className="text-xs text-muted-foreground uppercase">{sourceLang}</span>
+                            <span className="font-semibold text-sm truncate max-w-[150px]" title={cleanWord}>
+                                {cleanWord}
+                            </span>
+
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] text-muted-foreground uppercase font-mono">{targetLanguage}</span>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-5 w-5 rounded-full p-0 text-muted-foreground hover:text-foreground"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setActivePopoverId(null);
+                                    }}
+                                >
+                                    <X className="h-3.5 w-3.5" />
+                                    <span className="sr-only">Закрыть</span>
+                                </Button>
+                            </div>
                         </div>
 
                         <div className="text-sm min-h-[1.5rem] flex items-center">
@@ -87,7 +122,7 @@ export function WordToken({ word, sourceLang, fullSentence }: WordTokenProps) {
                         <Button
                             size="sm"
                             variant={isSaved ? 'outline' : 'default'}
-                            className="w-full text-xs h-8 gap-1"
+                            className="w-full text-xs h-8 gap-1 cursor-pointer"
                             disabled={loading || isSaved}
                             onClick={handleSaveWord}
                         >
@@ -104,8 +139,8 @@ export function WordToken({ word, sourceLang, fullSentence }: WordTokenProps) {
                     </div>
                 </PopoverContent>
             </Popover>
+            {' '}
 
-            {/* Диалог авторизации для Гостя */}
             <Dialog open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen}>
                 <DialogContent className="sm:max-w-[400px]" onClick={(e) => e.stopPropagation()}>
                     <DialogHeader>
@@ -120,7 +155,7 @@ export function WordToken({ word, sourceLang, fullSentence }: WordTokenProps) {
                         </Button>
                         <Button
                             onClick={() => {
-                                login(); // Симуляция входа
+                                login();
                                 setIsAuthDialogOpen(false);
                             }}
                         >

@@ -5,10 +5,14 @@ import { WordToken } from './WordToken';
 import { fetchTranslation } from '@/lib/translate';
 import { useReaderStore } from '@/store/useReaderStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
+import { useVocabularyStore } from '@/store/useVocabularyStore';
+import { useAuthStore } from '@/store/useAuthStore';
 import { useAudioSync, Sentence } from '@/hooks/useAudioSync';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Card } from '@/components/ui/card';
+import { Popover, PopoverContent, PopoverAnchor } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import {
   Tooltip,
   TooltipContent,
@@ -16,25 +20,36 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { Loader2, X } from 'lucide-react';
+import { Loader2, Check, Plus, X } from 'lucide-react';
 
 interface TextContentProps {
   sentences: Sentence[];
 }
 
+interface PhraseSelectionState {
+  rawText: string;
+  cleanText: string;
+  sentenceText: string;
+  rect: DOMRect;
+}
+
 export const TextContent = ({ sentences }: TextContentProps) => {
   const currentTime = useReaderStore((state) => state.currentTime);
   const setCurrentTime = useReaderStore((state) => state.setCurrentTime);
-
+  const activePopoverId = useReaderStore((state) => state.activePopoverId);
+  const setActivePopoverId = useReaderStore((state) => state.setActivePopoverId);
   const targetLanguage = useSettingsStore((state) => state.targetLanguage);
 
-  // Локальное состояние авто-скролла
+  const { isAuthenticated, login } = useAuthStore();
+  const { addItem, hasItem } = useVocabularyStore();
+
   const [autoScroll, setAutoScroll] = useState(true);
 
-  // Состояние для выделения и перевода фраз
-  const [selectedPhrase, setSelectedPhrase] = useState<string>('');
-  const [phraseTranslation, setPhraseTranslation] = useState<string>('');
-  const [isTranslatingPhrase, setIsTranslatingPhrase] = useState<boolean>(false);
+  // Состояние выделенной фразы (для 2+ слов)
+  const [phraseSelection, setPhraseSelection] = useState<PhraseSelectionState | null>(null);
+  const [translation, setTranslation] = useState<string>('');
+  const [isTranslating, setIsTranslating] = useState<boolean>(false);
+  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState<boolean>(false);
 
   const { activeId, seekToSentence, sentenceRefs } = useAudioSync({
     sentences,
@@ -43,25 +58,74 @@ export const TextContent = ({ sentences }: TextContentProps) => {
     autoScroll,
   });
 
-  // Перевод выделенного текста (фразы) при отпускании мыши
-  const handleTextSelection = async () => {
+  const handleMouseUp = async () => {
     const selection = window.getSelection();
-    const text = selection?.toString().trim();
+    if (!selection || selection.isCollapsed) return;
 
-    // Переводим только если выделена фраза (содержит пробел между словами)
-    if (text && text.length > 1 && text.includes(' ')) {
-      setSelectedPhrase(text);
-      setIsTranslatingPhrase(true);
-      const translation = await fetchTranslation(text, targetLanguage, 'RU');
-      setPhraseTranslation(translation);
-      setIsTranslatingPhrase(false);
+    const rawText = selection.toString().replace(/\s+/g, ' ').trim();
+    if (!rawText) return;
+
+    // Проверяем, что выделено минимум 2 слова
+    const wordsCount = rawText.split(' ').length;
+    if (wordsCount < 2) return;
+
+    const cleanText = rawText.replace(/[.,!?;:()""«»]/g, '');
+    if (!cleanText) return;
+
+    const range = selection.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+
+    // Находим текст предложения для контекста
+    let sentenceText = '';
+    let node: Node | null = range.startContainer;
+    while (node && !node.parentElement?.dataset?.sentenceText) {
+      node = node.parentNode;
+    }
+    if (node && node.parentElement?.dataset?.sentenceText) {
+      sentenceText = node.parentElement.dataset.sentenceText;
+    }
+
+    // Закрываем открытые одиночные Popover
+    setActivePopoverId('phrase-selection');
+
+    setPhraseSelection({
+      rawText,
+      cleanText,
+      sentenceText,
+      rect,
+    });
+
+    setIsTranslating(true);
+    const result = await fetchTranslation(cleanText, targetLanguage, 'ru');
+    setTranslation(result);
+    setIsTranslating(false);
+  };
+
+  const isPhraseSaved = phraseSelection ? hasItem(phraseSelection.cleanText) : false;
+
+  const handleSavePhrase = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!phraseSelection) return;
+
+    if (!isAuthenticated) {
+      setIsAuthDialogOpen(true);
+      return;
+    }
+
+    if (!isPhraseSaved && phraseSelection.cleanText) {
+      addItem({
+        original: phraseSelection.cleanText,
+        translation: translation || '—',
+        contextSentence: phraseSelection.sentenceText,
+        sourceLang: targetLanguage,
+        targetLang: 'ru',
+      });
     }
   };
 
-  // Клик по предложению с проверкой на отсутствие выделения
   const handleSentenceClick = (startTime: number) => {
+    // Не запускаем аудио, если юзер просто выделял текст
     const selection = window.getSelection();
-    // Если пользователь выделял текст (есть выделенные символы), игнорируем переход аудио
     if (selection && selection.toString().trim().length > 0) {
       return;
     }
@@ -69,10 +133,11 @@ export const TextContent = ({ sentences }: TextContentProps) => {
   };
 
   return (
-    <div className="space-y-4 relative"
-      onMouseUp={handleTextSelection} 
+    <div
+      className="space-y-4 relative selection:bg-primary/30 selection:text-primary-foreground"
+      onMouseUp={handleMouseUp}
     >
-      {/* Шапка текстовой секции и переключатель "Автопрокрутка" */}
+      {/* Шапка текстовой секции */}
       <div className="flex items-center justify-between pt-2">
         <h2 className="text-lg font-semibold">Текст материала:</h2>
 
@@ -100,31 +165,85 @@ export const TextContent = ({ sentences }: TextContentProps) => {
         </TooltipProvider>
       </div>
 
-      {/* Всплывающая плашка с переводом выделенной ФРАЗЫ */}
-      {selectedPhrase && (
-        <Card className="p-3 bg-card/95 backdrop-blur border shadow-lg flex items-center justify-between gap-4 sticky top-4 z-30 animate-in fade-in slide-in-from-top-2 duration-200">
-          <div className="text-sm">
-            <span className="font-semibold text-muted-foreground">Фраза: </span>
-            <span className="font-medium">&ldquo;{selectedPhrase}&rdquo;</span>
-            <span className="mx-2 text-muted-foreground">—</span>
-            {isTranslatingPhrase ? (
-              <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Loader2 className="h-3 w-3 animate-spin text-primary" /> Перевод...
-              </span>
-            ) : (
-              <span className="text-primary font-semibold">{phraseTranslation}</span>
-            )}
-          </div>
-          <button
-            onClick={() => setSelectedPhrase('')}
-            className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted transition-colors"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </Card>
+      {/* Popover для выделенных ФРАЗ (2+ слов) */}
+      {phraseSelection && activePopoverId === 'phrase-selection' && (
+        <Popover
+          open={true}
+          onOpenChange={(open) => {
+            if (!open) {
+              setPhraseSelection(null);
+              setActivePopoverId(null);
+            }
+          }}
+        >
+          <PopoverAnchor
+            style={{
+              position: 'fixed',
+              left: `${phraseSelection.rect.left + phraseSelection.rect.width / 2}px`,
+              top: `${phraseSelection.rect.top}px`,
+              width: '1px',
+              height: '1px',
+              pointerEvents: 'none',
+            }}
+          />
+          <PopoverContent className="w-64 p-3 shadow-md" side="top" align="center">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between border-b pb-1">
+                <span className="font-semibold text-sm truncate max-w-[170px]" title={phraseSelection.cleanText}>
+                  {phraseSelection.cleanText}
+                </span>
+
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] text-muted-foreground uppercase font-mono">{targetLanguage}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-5 w-5 rounded-full p-0 text-muted-foreground hover:text-foreground"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setPhraseSelection(null);
+                      setActivePopoverId(null);
+                    }}
+                  >
+                    <X className="h-3.5 w-3.5" />
+                    <span className="sr-only">Закрыть</span>
+                  </Button>
+                </div>
+              </div>
+
+              <div className="text-sm min-h-[1.5rem] flex items-center">
+                {isTranslating ? (
+                  <div className="flex items-center gap-2 text-muted-foreground text-xs">
+                    <Loader2 className="h-3 w-3 animate-spin" /> Переводим...
+                  </div>
+                ) : (
+                  <span className="text-foreground">{translation}</span>
+                )}
+              </div>
+
+              <Button
+                size="sm"
+                variant={isPhraseSaved ? 'outline' : 'default'}
+                className="w-full text-xs h-8 gap-1 cursor-pointer"
+                disabled={isTranslating || isPhraseSaved}
+                onClick={handleSavePhrase}
+              >
+                {isPhraseSaved ? (
+                  <>
+                    <Check className="h-3 w-3 text-green-500" /> В словаре
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-3 w-3" /> В словарь
+                  </>
+                )}
+              </Button>
+            </div>
+          </PopoverContent>
+        </Popover>
       )}
 
-      {/* Список предложений с подсветкой и кликом */}
+      {/* Список предложений */}
       <div className="space-y-3">
         {sentences.map((sentence) => {
           const isActive = sentence.id === activeId;
@@ -142,7 +261,7 @@ export const TextContent = ({ sentences }: TextContentProps) => {
                 'p-4 rounded-xl border transition-all duration-200 cursor-pointer',
                 'bg-card text-card-foreground hover:bg-muted/60 hover:border-muted-foreground/30',
                 isActive &&
-                  'bg-blue-500/10 border-blue-500/40 text-blue-950 dark:text-blue-100 shadow-sm ring-1 ring-blue-500/30 scale-[1.01]'
+                'bg-blue-500/10 border-blue-500/40 text-blue-950 dark:text-blue-100 shadow-sm ring-1 ring-blue-500/30 scale-[1.01]'
               )}
             >
               <div className="flex items-center justify-between mb-1.5 select-none">
@@ -158,21 +277,51 @@ export const TextContent = ({ sentences }: TextContentProps) => {
                 </span>
               </div>
 
-              {/* Рендеринг каждого слова с вызовом Popover по клику */}
-              <p className="text-base md:text-lg leading-relaxed flex flex-wrap gap-x-1 gap-y-0.5">
-                {words.map((word, idx) => (
-                  <WordToken
-                    key={`${sentence.id}-w-${idx}`}
-                    word={word}
-                    sourceLang={targetLanguage}
-                    fullSentence={sentence.text}
-                  />
-                ))}
+              <p
+                data-sentence-text={sentence.text}
+                className="text-base md:text-lg leading-relaxed inline-block"
+              >
+                {words.map((word, idx) => {
+                  const tokenId = `${sentence.id}-w-${idx}`;
+                  return (
+                    <WordToken
+                      key={tokenId}
+                      tokenId={tokenId}
+                      word={word}
+                      fullSentence={sentence.text}
+                    />
+                  );
+                })}
               </p>
             </div>
           );
         })}
       </div>
+
+      {/* Диалог авторизации */}
+      <Dialog open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen}>
+        <DialogContent className="sm:max-w-[400px]" onClick={(e) => e.stopPropagation()}>
+          <DialogHeader>
+            <DialogTitle>Сохранение фраз</DialogTitle>
+            <DialogDescription className="pt-2">
+              Войдите в аккаунт, чтобы сохранять фразы и слова в личный словарь.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0 mt-4">
+            <Button variant="ghost" onClick={() => setIsAuthDialogOpen(false)}>
+              Отмена
+            </Button>
+            <Button
+              onClick={() => {
+                login();
+                setIsAuthDialogOpen(false);
+              }}
+            >
+              Войти
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

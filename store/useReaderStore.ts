@@ -25,6 +25,9 @@ interface ReaderState {
   isAutoScrollEnabled: boolean;
   isSentenceLoopEnabled: boolean;
 
+  // --- Управление Popover (слово / фраза) ---
+  activePopoverId: string | null;
+
   // --- Действия (Actions) ---
   setIsPlaying: (isPlaying: boolean) => void;
   setCurrentTime: (currentTime: number) => void;
@@ -33,6 +36,7 @@ interface ReaderState {
   setActiveSentenceIndex: (index: number | null) => void;
   toggleAutoScroll: () => void;
   toggleSentenceLoop: () => void;
+  setActivePopoverId: (id: string | null) => void;
 }
 
 export const useReaderStore = create<ReaderState>()(
@@ -58,6 +62,7 @@ export const useReaderStore = create<ReaderState>()(
       activeSentenceIndex: null,
       isAutoScrollEnabled: true,
       isSentenceLoopEnabled: false,
+      activePopoverId: null,
 
       // Методы обновления плеера
       setIsPlaying: (isPlaying) => set({ isPlaying }),
@@ -69,6 +74,7 @@ export const useReaderStore = create<ReaderState>()(
         set((state) => ({ isAutoScrollEnabled: !state.isAutoScrollEnabled })),
       toggleSentenceLoop: () =>
         set((state) => ({ isSentenceLoopEnabled: !state.isSentenceLoopEnabled })),
+      setActivePopoverId: (activePopoverId) => set({ activePopoverId }),
     }),
     {
       name: 'polyglot-reader-session',
