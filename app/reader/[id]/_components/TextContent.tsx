@@ -198,7 +198,7 @@ export const TextContent = ({ sentences }: TextContentProps) => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-5 w-5 rounded-full p-0 text-muted-foreground hover:text-foreground"
+                    className="h-5 w-5 rounded-full p-0 text-muted-foreground hover:text-foreground focus:outline-none"
                     onClick={(e) => {
                       e.stopPropagation();
                       setPhraseSelection(null);

@@ -2,12 +2,11 @@ import { getFilteredTexts } from '@/lib/texts';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Clock, BookOpen, Info } from 'lucide-react';
+import { ArrowLeft, Info } from 'lucide-react';
 import { AudioPlayer } from './_components/AudioPlayer';
-import { pluralizeWords } from '@/lib/utils';
 import { ReaderClientWrapper } from './_components/ReaderClientWrapper';
 import { TextContent } from './_components/TextContent';
+import { MaterialHeader } from './_components/MaterialHeader';
 
 interface ReaderPageProps {
   params: Promise<{
@@ -41,25 +40,16 @@ export default async function ReaderPage({ params }: ReaderPageProps) {
           </Link>
         </Button>
 
-        {/* Шапка текста */}
-        <div className="space-y-3 border-b pb-6">
-          <div className="flex items-center gap-2">
-            <Badge variant="outline">{material.targetLanguage}</Badge>
-            <Badge>{material.level}</Badge>
-            <Badge variant="secondary">{material.category}</Badge>
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight">{material.title}</h1>
-          <p className="text-muted-foreground">{material.description}</p>
-
-          <div className="flex items-center gap-4 text-xs text-muted-foreground pt-2">
-            <span className="flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5" /> {material.duration} сек.
-            </span>
-            <span className="flex items-center gap-1">
-              <BookOpen className="w-3.5 h-3.5" /> {pluralizeWords(material.wordCount)}
-            </span>
-          </div>
-        </div>
+        {/* Интерактивная шапка материала */}
+        <MaterialHeader
+          title={material.title}
+          description={material.description}
+          targetLanguage={material.targetLanguage}
+          level={material.level}
+          category={material.category}
+          duration={material.duration}
+          wordCount={material.wordCount}
+        />
 
         <div className="flex items-start gap-3 rounded-xl border border-blue-500/20 bg-blue-500/5 px-4 py-3 text-sm text-foreground">
           <Info className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />

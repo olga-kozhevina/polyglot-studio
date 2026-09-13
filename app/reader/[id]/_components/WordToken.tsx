@@ -15,6 +15,7 @@ interface WordTokenProps {
     tokenId: string;
     word: string;
     fullSentence: string;
+    className?: string;
 }
 
 export function WordToken({ tokenId, word, fullSentence }: WordTokenProps) {
@@ -97,7 +98,7 @@ export function WordToken({ tokenId, word, fullSentence }: WordTokenProps) {
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-5 w-5 rounded-full p-0 text-muted-foreground hover:text-foreground"
+                                    className="h-5 w-5 rounded-full p-0 text-muted-foreground hover:text-foreground focus:outline-none"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         setActivePopoverId(null);
