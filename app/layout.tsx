@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from 'next/link';
-import { ThemeProvider } from "@/components/ui/theme-provider"
-import { Sidebar } from '@/components/navigation/Sidebar'
-import { BottomNav } from '@/components/navigation/BottomNav'
-import { HeaderControls } from '@/components/navigation/HeaderControls'
+import { ThemeProvider } from "@/components/ui/theme-provider";
+import { Sidebar } from '@/components/navigation/Sidebar';
+import { BottomNav } from '@/components/navigation/BottomNav';
+import { HeaderControls } from '@/components/navigation/HeaderControls';
+import { AuthModal } from '@/components/auth/AuthModal';
 import "./globals.css";
 
 const geistSans = Geist({
@@ -46,7 +47,7 @@ export default function RootLayout({
 
             {/* Основной контентный блок */}
             <div className="md:pl-64 flex flex-col min-h-screen">
-              {/* Шапка: название на мобилках + языки и ThemeToggle */}
+              {/* Шапка */}
               <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur px-4 h-16 flex items-center justify-between md:justify-end gap-2 overflow-hidden">
                 <Link
                   href="/"
@@ -55,8 +56,9 @@ export default function RootLayout({
                   <div className="h-7 w-7 aspect-square shrink-0 self-center rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm">
                     P
                   </div>
-                  <span className="font-bold tracking-tight text-sm leading-tight text-left">Polyglot
-                    <span className="block sm:inline"> Studio</span></span>
+                  <span className="font-bold tracking-tight text-sm leading-tight text-left">
+                    Polyglot<span className="block sm:inline"> Studio</span>
+                  </span>
                 </Link>
                 <HeaderControls />
               </header>
@@ -69,6 +71,9 @@ export default function RootLayout({
 
             {/* Нижняя навигация для мобильных */}
             <BottomNav />
+
+            {/* 2. Глобальное окно авторизации */}
+            <AuthModal />
           </div>
         </ThemeProvider>
       </body>

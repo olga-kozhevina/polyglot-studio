@@ -1,16 +1,11 @@
 'use client';
 
-import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { WordToken } from './WordToken';
 import { Clock, BookOpen, Loader2, Check, Plus, X } from 'lucide-react';
 import { pluralizeWords } from '@/lib/utils';
-import { fetchTranslation } from '@/lib/translate';
-import { useSettingsStore } from '@/store/useSettingsStore';
-import { useReaderStore } from '@/store/useReaderStore';
-import { useVocabularyStore } from '@/store/useVocabularyStore';
-import { useAuthStore } from '@/store/useAuthStore';
-import { Popover, PopoverAnchor, PopoverContent } from '@/components/ui/popover';
+import { usePhraseSelection } from '@/hooks/usePhraseSelection';
+import { Popover, PopoverContent, PopoverAnchor } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 
@@ -24,120 +19,73 @@ interface MaterialHeaderProps {
     wordCount: number;
 }
 
-interface PhraseSelection {
-    cleanText: string;
-    rect: DOMRect;
-    contextSentence: string;
+// Вспомогательный компонент для превращения текста в интерактивные слова
+function RenderInteractiveText({ text, prefixId, className }: { text: string; prefixId: string; className?: string }) {
+    const words = text.split(' ');
+    return (
+        <span className={className} data-sentence-text={text}>
+            {words.map((word, idx) => (
+                <span key={`${prefixId}-${idx}`}>
+                    <WordToken
+                        tokenId={`${prefixId}-${idx}`}
+                        word={word}
+                        fullSentence={text}
+                        className={className}
+                    />
+                    {idx < words.length - 1 && ' '}
+                </span>
+            ))}
+        </span>
+    );
 }
 
 export function MaterialHeader({
     title,
     description,
-    targetLanguage,
+    targetLanguage: targetLangProp,
     level,
     category,
     duration,
     wordCount,
 }: MaterialHeaderProps) {
-    const currentLang = useSettingsStore((state) => state.targetLanguage) || targetLanguage;
-    const activePopoverId = useReaderStore((state) => state.activePopoverId);
-    const setActivePopoverId = useReaderStore((state) => state.setActivePopoverId);
-
-    const { isAuthenticated, login } = useAuthStore();
-    const { addItem, hasItem } = useVocabularyStore();
-
-    const [phraseSelection, setPhraseSelection] = useState<PhraseSelection | null>(null);
-    const [translation, setTranslation] = useState<string>('');
-    const [isTranslating, setIsTranslating] = useState<boolean>(false);
-    const [isAuthDialogOpen, setIsAuthDialogOpen] = useState<boolean>(false);
-
-    // Выделение фраз мышкой
-    const handleMouseUp = async () => {
-        const selection = window.getSelection();
-        if (!selection || selection.isCollapsed) return;
-
-        const rawText = selection.toString().replace(/\s+/g, ' ').trim();
-        if (!rawText || rawText.split(' ').length < 2) return;
-
-        const cleanText = rawText.replace(/[.,!?;:()""«»]/g, '');
-        if (!cleanText) return;
-
-        const range = selection.getRangeAt(0);
-        const rect = range.getBoundingClientRect();
-
-        setActivePopoverId('header-phrase-selection');
-        setPhraseSelection({
-            cleanText,
-            rect,
-            contextSentence: `${title}. ${description}`,
-        });
-
-        setIsTranslating(true);
-        const res = await fetchTranslation(cleanText, currentLang, 'ru');
-        setTranslation(res);
-        setIsTranslating(false);
-    };
-
-    const isSaved = phraseSelection ? hasItem(phraseSelection.cleanText) : false;
-
-    const handleSavePhrase = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (!phraseSelection) return;
-
-        if (!isAuthenticated) {
-            setIsAuthDialogOpen(true);
-            return;
-        }
-
-        if (!isSaved && phraseSelection.cleanText) {
-            addItem({
-                original: phraseSelection.cleanText,
-                translation: translation || '—',
-                contextSentence: phraseSelection.contextSentence,
-                sourceLang: currentLang,
-                targetLang: 'ru',
-            });
-        }
-    };
-
-    const titleWords = title.split(' ');
-    const descriptionWords = description.split(' ');
+    // Используем общий хук выделения фраз
+    const {
+        phraseSelection,
+        isTranslating,
+        translation,
+        isSaved,
+        targetLanguage,
+        isAuthDialogOpen,
+        setIsAuthDialogOpen,
+        handleMouseUp,
+        handleSavePhrase,
+        closePopover,
+        handleOpenFullAuthModal,
+    } = usePhraseSelection();
 
     return (
-        <div
-            className="space-y-3 border-b pb-6 select-text selection:bg-primary/20 selection:text-foreground"
-            onMouseUp={handleMouseUp}
+        <div 
+            className="space-y-3 border-b pb-6 select-text selection:bg-primary/20 selection:text-foreground relative"
+            onMouseUp={() => handleMouseUp()}
         >
+            {/* Метки / Теги */}
             <div className="flex items-center gap-2">
-                <Badge variant="outline">{targetLanguage}</Badge>
+                <Badge variant="outline">{targetLangProp}</Badge>
                 <Badge>{level}</Badge>
                 <Badge variant="secondary">{category}</Badge>
             </div>
 
+            {/* Заголовок */}
             <h1 className="text-3xl font-bold tracking-tight leading-snug">
-                {titleWords.map((word, idx) => (
-                    <WordToken
-                        key={`title-w-${idx}`}
-                        tokenId={`header-title-w-${idx}`}
-                        word={word}
-                        fullSentence={title}
-                        className="text-3xl font-bold"
-                    />
-                ))}
+                <RenderInteractiveText text={title} prefixId="header-title" className="text-3xl font-bold" />
             </h1>
 
+            {/* Подзаголовок / Описание */}
             <p className="text-muted-foreground leading-relaxed">
-                {descriptionWords.map((word, idx) => (
-                    <WordToken
-                        key={`desc-w-${idx}`}
-                        tokenId={`header-desc-w-${idx}`}
-                        word={word}
-                        fullSentence={description}
-                        className="text-muted-foreground font-normal"
-                    />
-                ))}
+                <RenderInteractiveText text={description} prefixId="header-desc" className="text-muted-foreground font-normal" />
             </p>
 
+            {/* Мета-информация */}
             <div className="flex items-center gap-4 text-xs text-muted-foreground pt-2 pb-4">
                 <span className="flex items-center gap-1">
                     <Clock className="w-3.5 h-3.5" /> {duration} сек.
@@ -147,17 +95,9 @@ export function MaterialHeader({
                 </span>
             </div>
 
-            {/* Popover для выделенных фраз в шапке */}
-            {phraseSelection && activePopoverId === 'header-phrase-selection' && (
-                <Popover
-                    open={true}
-                    onOpenChange={(open) => {
-                        if (!open) {
-                            setPhraseSelection(null);
-                            setActivePopoverId(null);
-                        }
-                    }}
-                >
+            {/* Popover для перевода выделенных фраз (2+ слов) */}
+            {phraseSelection && (
+                <Popover open={true} onOpenChange={(open) => !open && closePopover()}>
                     <PopoverAnchor
                         style={{
                             position: 'fixed',
@@ -168,24 +108,20 @@ export function MaterialHeader({
                             pointerEvents: 'none',
                         }}
                     />
-                    <PopoverContent className="w-64 p-3 shadow-md relative" side="top" align="center" onOpenAutoFocus={(e) => e.preventDefault()}>
+                    <PopoverContent className="w-64 p-3 shadow-md" side="top" align="center">
                         <div className="space-y-2">
                             <div className="flex items-center justify-between border-b pb-1">
-                                <span className="font-semibold text-sm truncate max-w-[150px]" title={phraseSelection.cleanText}>
+                                <span className="font-semibold text-sm truncate max-w-[170px]" title={phraseSelection.cleanText}>
                                     {phraseSelection.cleanText}
                                 </span>
 
                                 <div className="flex items-center gap-1.5">
-                                    <span className="text-[10px] text-muted-foreground uppercase font-mono">{currentLang}</span>
+                                    <span className="text-[10px] text-muted-foreground uppercase font-mono">{targetLanguage}</span>
                                     <Button
                                         variant="ghost"
                                         size="icon"
                                         className="h-5 w-5 rounded-full p-0 text-muted-foreground hover:text-foreground focus:outline-none"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setPhraseSelection(null);
-                                            setActivePopoverId(null);
-                                        }}
+                                        onClick={closePopover}
                                     >
                                         <X className="h-3.5 w-3.5" />
                                         <span className="sr-only">Закрыть</span>
@@ -225,7 +161,7 @@ export function MaterialHeader({
                 </Popover>
             )}
 
-            {/* Диалог авторизации */}
+            {/* Диалог авторизации при попытке сохранить фразу неавторизованным пользователем */}
             <Dialog open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen}>
                 <DialogContent className="sm:max-w-[400px]" onClick={(e) => e.stopPropagation()}>
                     <DialogHeader>
@@ -238,14 +174,7 @@ export function MaterialHeader({
                         <Button variant="ghost" onClick={() => setIsAuthDialogOpen(false)}>
                             Отмена
                         </Button>
-                        <Button
-                            onClick={() => {
-                                login();
-                                setIsAuthDialogOpen(false);
-                            }}
-                        >
-                            Войти
-                        </Button>
+                        <Button onClick={handleOpenFullAuthModal}>Войти</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

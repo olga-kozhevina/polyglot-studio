@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { HeroTitle } from '@/components/home/hero-title';
+import { HeroTitle } from '@/components/home/HeroTitle';
 import {
   Mic,
   Headphones,
@@ -39,7 +39,7 @@ export default function Home() {
 
         <div className="pt-2">
           <Link href="/catalog">
-            <Button size="lg" className="gap-2 text-sm md:text-base px-8 h-12 rounded-xl shadow-md hover:shadow-lg transition-all">
+            <Button size="lg" className="gap-2 text-sm md:text-base px-8 h-12 rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer">
               Перейти в каталог <ArrowRight className="w-4 h-4" />
             </Button>
           </Link>

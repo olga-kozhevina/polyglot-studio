@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+// import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { fetchTranslation } from '@/lib/translate';
 import { useVocabularyStore } from '@/store/useVocabularyStore';
@@ -25,14 +25,15 @@ export function WordToken({ tokenId, word, fullSentence }: WordTokenProps) {
 
     const [translation, setTranslation] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
-    const [isAuthDialogOpen, setIsAuthDialogOpen] = useState<boolean>(false);
+    // const [isAuthDialogOpen, setIsAuthDialogOpen] = useState<boolean>(false);
 
     const cleanWord = word.replace(/[.,!?;:()""«»]/g, '');
-    const { isAuthenticated, login } = useAuthStore();
+    const { isAuthenticated, openAuthModal } = useAuthStore();
     const { addItem, hasItem } = useVocabularyStore();
 
     const isOpen = activePopoverId === tokenId;
-    const isSaved = hasItem(cleanWord);
+    // Если пользователь залогинен, проверяем наличие слова в сторе
+    const isSaved = isAuthenticated ? hasItem(cleanWord) : false;
 
     const handleOpenChange = async (open: boolean) => {
         // Если пользователь выделяет несколько слов — игнорируем одиночный Popover
@@ -57,7 +58,7 @@ export function WordToken({ tokenId, word, fullSentence }: WordTokenProps) {
     const handleSaveWord = (e: React.MouseEvent) => {
         e.stopPropagation();
         if (!isAuthenticated) {
-            setIsAuthDialogOpen(true);
+            openAuthModal();
             return;
         }
 
@@ -94,7 +95,9 @@ export function WordToken({ tokenId, word, fullSentence }: WordTokenProps) {
                             </span>
 
                             <div className="flex items-center gap-1.5">
-                                <span className="text-[10px] text-muted-foreground uppercase font-mono">{targetLanguage}</span>
+                                <span className="text-[10px] text-muted-foreground uppercase font-mono">
+                                    {targetLanguage}
+                                </span>
                                 <Button
                                     variant="ghost"
                                     size="icon"
@@ -142,7 +145,7 @@ export function WordToken({ tokenId, word, fullSentence }: WordTokenProps) {
             </Popover>
             {' '}
 
-            <Dialog open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen}>
+            {/* <Dialog open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen}>
                 <DialogContent className="sm:max-w-[400px]" onClick={(e) => e.stopPropagation()}>
                     <DialogHeader>
                         <DialogTitle>Сохранение слов</DialogTitle>
@@ -156,7 +159,7 @@ export function WordToken({ tokenId, word, fullSentence }: WordTokenProps) {
                         </Button>
                         <Button
                             onClick={() => {
-                                login();
+                                login('user@example.com');
                                 setIsAuthDialogOpen(false);
                             }}
                         >
@@ -164,7 +167,7 @@ export function WordToken({ tokenId, word, fullSentence }: WordTokenProps) {
                         </Button>
                     </DialogFooter>
                 </DialogContent>
-            </Dialog>
+            </Dialog> */}
         </>
     );
 }

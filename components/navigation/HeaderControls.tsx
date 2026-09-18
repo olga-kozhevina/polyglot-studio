@@ -1,8 +1,10 @@
 'use client'
 
+import { useSyncExternalStore } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useSettingsStore, TargetLanguage } from '@/store/useSettingsStore'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { UserNav } from '@/components/layout/UserNav'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -18,29 +20,35 @@ const TARGET_LANGUAGES: { code: TargetLanguage; label: string }[] = [
   { code: 'TR', label: 'Türkçe' },
 ]
 
+// Пустая функция подписки
+const subscribe = () => () => { }
+
 export function HeaderControls() {
   const router = useRouter()
   const pathname = usePathname()
+
+  // Подписка на клиентский флаг БЕЗ вызова setState (не вызывает ошибку React 19!)
+  const isClient = useSyncExternalStore(
+    subscribe,
+    () => true,
+    () => false
+  )
 
   const { targetLanguage, setTargetLanguage } = useSettingsStore()
 
   const currentLang =
     TARGET_LANGUAGES.find((lang) => lang.code === targetLanguage) || TARGET_LANGUAGES[0]
-  
+
   // Логика умного переключения языка
   const handleLanguageChange = (newLang: TargetLanguage) => {
-  // 1. Обновляем выбранный язык в Zustand
-  setTargetLanguage(newLang)
+    setTargetLanguage(newLang)
+    const isInsideSpecificLesson = pathname.startsWith('/reader/')
 
-  // 2. Если пользователь находился внутри конкретного урока (/reader/[id])
-  // Мы перенаправляем его на главную страницу ридера /reader
-  const isInsideSpecificLesson = pathname.startsWith('/reader/')
+    if (isInsideSpecificLesson) {
+      router.push('/reader')
+    }
 
-  if (isInsideSpecificLesson) {
-    router.push('/reader')
   }
-
-}
 
   return (
     <div className="flex items-center gap-2 min-[400px]:gap-3 shrink-0">
@@ -56,8 +64,9 @@ export function HeaderControls() {
             >
               <div className="flex items-center gap-1 min-w-0">
                 <Globe className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                <span className="truncate" suppressHydrationWarning>
-                  {currentLang.label}
+                <span className="truncate">
+                  {/* Если рендерится на сервере — показываем пустую строку/заглушку, чтобы не рендерить 'English' */}
+                  {isClient ? currentLang.label : ''}
                 </span>
               </div>
               <ChevronDown className="h-3 w-3 opacity-60 shrink-0" />
@@ -91,6 +100,7 @@ export function HeaderControls() {
       </div>
 
       <ThemeToggle />
+      <UserNav />
     </div>
   )
 }
