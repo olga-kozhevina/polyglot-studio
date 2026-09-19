@@ -37,17 +37,21 @@ export const useAuthStore = create<AuthState>()(
       closeAuthModal: () => set({ isAuthModalOpen: false }),
 
       login: (email: string, name?: string) => {
+        const cleanEmail = email.trim().toLowerCase()
         const userName = name?.trim() || email.split('@')[0]
+
         set({
           user: {
-            id: `user_${Date.now()}`,
-            email,
+            id: `user_${cleanEmail}`,
+            email: cleanEmail,
             name: userName,
             avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userName}`,
           },
           isAuthenticated: true,
           isAuthModalOpen: false,
         })
+        // Подгружаем словарь вошедшего юзера
+        useVocabularyStore.getState().syncUserVocabulary()
       },
 
       loginWithGoogle: () => {
@@ -61,17 +65,18 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: true,
           isAuthModalOpen: false,
         })
+        // Подгружаем словарь Google-аккаунта
+        useVocabularyStore.getState().syncUserVocabulary()
       },
 
       logout: () => {
-        // Очищаем локальный словарь при выходе
-        useVocabularyStore.getState().clearVocabulary();
-
         set({
           user: null,
           isAuthenticated: false,
           isAuthModalOpen: false,
-        });
+        })
+        // Синхронизируем словарь (для гостя массив items станет пустым, но сохраненные слова НЕ удлятся!)
+        useVocabularyStore.getState().syncUserVocabulary()
       },
     }),
     {
@@ -83,6 +88,10 @@ export const useAuthStore = create<AuthState>()(
       }),
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true)
+        // Синхронизируем словарь после гидрации auth-стора из localStorage
+        setTimeout(() => {
+          useVocabularyStore.getState().syncUserVocabulary()
+        }, 0)
       },
     }
   )
