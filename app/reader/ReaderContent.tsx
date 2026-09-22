@@ -1,12 +1,19 @@
 'use client';
 
 import Link from 'next/link';
-import { useReaderStore } from '@/store/useReaderStore';
+import { useReaderStore, LastSession } from '@/store/useReaderStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Headphones,
   Play,
@@ -16,25 +23,46 @@ import {
   UserPlus,
   History,
   Lock,
-  UserCheck, // <- Исправлено: добавлен импорт
 } from 'lucide-react';
 
 export default function ReaderContent() {
-  // 1. Получаем текущий активный язык из стора настроек
   const targetLanguage = useSettingsStore((state) => state.targetLanguage);
-
-  // 2. Достаем объект всех сессий по языкам
-  const lastSessionsByLang = useReaderStore((state) => state.lastSessionsByLang);
-
-  // 3. Находим последнюю сессию для выбранного языка (если она есть)
-  const lastSession = lastSessionsByLang[targetLanguage];
-
   const { isAuthenticated, openAuthModal } = useAuthStore();
+
+  // Из стора достаем объект всех сессий по языкам (где значение — это массив LastSession[])
+  const lastSessionsByLang = useReaderStore((state) => state.lastSessionsByLang);
+  const hasHydrated = useReaderStore((state) => state._hasHydrated);
+
+  // Получаем массив сессий для текущего выбранного языка
+  const targetSessions = lastSessionsByLang[targetLanguage] || [];
+
+  // Самая последняя активная сессия — первый элемент из массива
+  const lastSession: LastSession | undefined = targetSessions[0];
+
+  // Пока данные из localStorage не гидратированы, демонстрируем плавный Skeleton
+  if (!hasHydrated) {
+    return (
+      <div className="max-w-3xl mx-auto py-6 sm:py-10 px-4 space-y-8">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-4 w-72" />
+        </div>
+        <Card className="border-primary/20 p-6 space-y-4">
+          <Skeleton className="h-6 w-1/3" />
+          <Skeleton className="h-4 w-1/2" />
+          <div className="flex gap-3 pt-4">
+            <Skeleton className="h-10 w-36 rounded-md" />
+            <Skeleton className="h-10 w-36 rounded-md" />
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-3xl mx-auto py-6 sm:py-10 px-4 space-y-8">
       {lastSession ? (
-        /* --- СЦЕНАРИЙ 1: Есть последняя тренировка для данного языка --- */
+        /* --- СЦЕНАРИЙ 1: Есть хотя бы одна сессия для данного языка --- */
         <div className="space-y-6">
           <div className="space-y-1">
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
@@ -45,7 +73,8 @@ export default function ReaderContent() {
             </p>
           </div>
 
-          <Card className="border-primary/40 bg-gradient-to-br from-primary/5 via-background to-background">
+          {/* Карточка последнего открытого материала */}
+          <Card className="border-primary/40 bg-linear-to-br from-primary/5 via-background to-background">
             <CardHeader className="pb-3">
               <div className="flex items-center gap-2 text-primary font-medium text-xs sm:text-sm">
                 <Sparkles className="h-4 w-4" />
@@ -83,7 +112,7 @@ export default function ReaderContent() {
             </CardContent>
           </Card>
 
-          {/* Отображаем разный контент в зависимости от состояния авторизации */}
+          {/* Отображаем разный контент в зависимости от авторизации */}
           {!isAuthenticated ? (
             /* --- БАННЕР ДЛЯ ГОСТЯ --- */
             <Card className="border-dashed bg-muted/20">
@@ -131,31 +160,50 @@ export default function ReaderContent() {
               </CardContent>
             </Card>
           ) : (
-            /* --- БЛОК ДЛЯ АВТОРИЗОВАННОГО ПОЛЬЗОВАТЕЛЯ --- */
-            <Card className="bg-muted/10 border-emerald-500/20">
-              <CardContent className="p-4 sm:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <div className="flex items-center gap-3.5">
-                  <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
-                    <UserCheck className="w-5 h-5" />
-                  </div>
-                  <div className="space-y-0.5">
-                    <h3 className="font-semibold text-sm">Вы вошли в аккаунт</h3>
-                    <p className="text-xs text-muted-foreground">
-                      Ваш прогресс и сохраненный словарь синхронизируются.
-                    </p>
-                  </div>
-                </div>
-                <Button asChild variant="outline" size="sm" className="w-full md:w-auto">
-                  <Link href="/profile">
-                    Личный кабинет
-                  </Link>
+            /* --- БЛОК ДЛЯ АВТОРИЗОВАННОГО ПОЛЬЗОВАТЕЛЯ С ИСТОРИЕЙ ТЕКСТОВ --- */
+            <div className="space-y-4 pt-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold flex items-center gap-2">
+                  <History className="w-5 h-5 text-primary" />
+                  История изученных текстов ({targetLanguage})
+                </h2>
+                <Button asChild variant="ghost" size="sm">
+                  <Link href="/profile">В личный кабинет →</Link>
                 </Button>
-              </CardContent>
-            </Card>
+              </div>
+
+              {targetSessions.length > 0 ? (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {targetSessions.map((item: LastSession) => (
+                    <Card key={item.id} className="hover:border-primary/50 transition-colors">
+                      <CardHeader className="p-4 pb-2">
+                        <CardTitle className="text-sm font-medium line-clamp-1">
+                          {item.title}
+                        </CardTitle>
+                        <CardDescription className="text-xs uppercase">
+                          Уровень: {item.level}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="p-4 pt-0">
+                        <Button asChild variant="secondary" size="sm" className="w-full mt-2 gap-1.5 text-xs">
+                          <Link href={`/reader/${item.id}`}>
+                            <Play className="w-3.5 h-3.5" /> Открыть текст
+                          </Link>
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <Card className="bg-muted/10 border-dashed p-4 text-center text-sm text-muted-foreground">
+                  Здесь будет отображаться список всех пройденных вами материалов.
+                </Card>
+              )}
+            </div>
           )}
         </div>
       ) : (
-        /* --- СЦЕНАРИЙ 2: EMPTY STATE --- */
+        /* --- СЦЕНАРИЙ 2: EMPTY STATE (Если нет ни одной сессии) --- */
         <div className="text-center space-y-8 py-4">
           <div className="space-y-3">
             <div className="mx-auto w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-4">

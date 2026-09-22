@@ -3,6 +3,7 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { useVocabularyStore } from './useVocabularyStore'
+import { useReaderStore } from './useReaderStore'
 
 export interface User {
   id: string
@@ -39,10 +40,11 @@ export const useAuthStore = create<AuthState>()(
       login: (email: string, name?: string) => {
         const cleanEmail = email.trim().toLowerCase()
         const userName = name?.trim() || email.split('@')[0]
+        const userId = `user_${cleanEmail}`
 
         set({
           user: {
-            id: `user_${cleanEmail}`,
+            id: userId,
             email: cleanEmail,
             name: userName,
             avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userName}`,
@@ -52,12 +54,17 @@ export const useAuthStore = create<AuthState>()(
         })
         // Подгружаем словарь вошедшего юзера
         useVocabularyStore.getState().syncUserVocabulary()
+
+        // Синхронизируем и переносим сессии ридера для вошедшего юзера
+        useReaderStore.getState().syncUserReaderSession(userId)
       },
 
       loginWithGoogle: () => {
+        const googleUserId = 'google_user_777'
+
         set({
           user: {
-            id: 'google_user_777',
+            id: googleUserId,
             email: 'user.polyglot@gmail.com',
             name: 'User',
             avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alex',
@@ -67,6 +74,9 @@ export const useAuthStore = create<AuthState>()(
         })
         // Подгружаем словарь Google-аккаунта
         useVocabularyStore.getState().syncUserVocabulary()
+
+        // Синхронизируем и переносим сессии ридера для Google-юзера
+        useReaderStore.getState().syncUserReaderSession(googleUserId)
       },
 
       logout: () => {
@@ -77,6 +87,10 @@ export const useAuthStore = create<AuthState>()(
         })
         // Синхронизируем словарь (для гостя массив items станет пустым, но сохраненные слова НЕ удлятся!)
         useVocabularyStore.getState().syncUserVocabulary()
+
+        // Переключаем ридер на гостевой режим (чистая сессия) и сбрасываем плеер
+        useReaderStore.getState().syncUserReaderSession(null)
+        useReaderStore.getState().resetReaderState()
       },
     }),
     {
@@ -90,7 +104,9 @@ export const useAuthStore = create<AuthState>()(
         state?.setHasHydrated(true)
         // Синхронизируем словарь после гидрации auth-стора из localStorage
         setTimeout(() => {
+          const userId = useAuthStore.getState().user?.id || null
           useVocabularyStore.getState().syncUserVocabulary()
+          useReaderStore.getState().syncUserReaderSession(userId)
         }, 0)
       },
     }
