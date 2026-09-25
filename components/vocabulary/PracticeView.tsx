@@ -6,42 +6,37 @@ import { LanguageCode } from '@/types/vocabulary'
 import { speakWord } from '@/lib/spaced-repetition'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import { Volume2, RotateCw, CheckCircle2 } from 'lucide-react'
 
 interface Props {
   items: VocabularyItem[]
-  onReview: (id: string, grade: 'again' | 'hard' | 'easy') => void
+  onReview: (id: string, decision: 'repeat' | 'mastered') => void
 }
 
 export function PracticeView({ items, onReview }: Props) {
-  const [currentIndex, setCurrentIndex] = useState(0)
   const [isFlipped, setIsFlipped] = useState(false)
 
-  if (items.length === 0) {
+  // Если массив пуст — сессия завершена
+  if (!items || items.length === 0) {
     return (
       <Card className="p-8 text-center max-w-md mx-auto space-y-4">
         <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto" />
         <h3 className="text-xl font-bold">Отличная работа!</h3>
         <p className="text-muted-foreground text-sm">
-          На сегодня нет карточек для повторения. Все слова усвоены или еще не пришел срок повтора.
+          На текущий момент все слова из сессии пройдены. Можете добавить новые или отдохнуть!
         </p>
       </Card>
     )
   }
 
-  const currentItem = items[currentIndex] || items[0]
-  const progressPercent = Math.round(((currentIndex) / items.length) * 100)
+  // Всегда берем ПЕРВУЮ карточку из текущей очереди
+  const currentItem = items[0]
 
-  const handleGrade = (grade: 'again' | 'hard' | 'easy') => {
+  const handleDecision = (decision: 'repeat' | 'mastered') => {
     setIsFlipped(false)
-    onReview(currentItem.id, grade)
-    if (currentIndex < items.length - 1) {
-      setCurrentIndex((prev) => prev + 1)
-    } else {
-      setCurrentIndex(0)
-    }
+    // Вызов onReview обновит статус слова в сторе и удалит его из sessionQueue
+    onReview(currentItem.id, decision)
   }
 
   const maskedContext = currentItem.contextSentence
@@ -55,10 +50,9 @@ export function PracticeView({ items, onReview }: Props) {
     <div className="max-w-xl mx-auto space-y-6">
       <div className="space-y-2">
         <div className="flex justify-between text-sm text-muted-foreground">
-          <span>Прогресс тренировки</span>
-          <span>{currentIndex + 1} из {items.length}</span>
+          <span>Осталось в текущей тренировке</span>
+          <span className="font-semibold text-foreground">{items.length}</span>
         </div>
-        <Progress value={progressPercent} className="h-2" />
       </div>
 
       <div
@@ -70,7 +64,7 @@ export function PracticeView({ items, onReview }: Props) {
             isFlipped ? 'rotate-y-180' : ''
           }`}
         >
-          {/* Front Card */}
+          {/* Лицевая сторона */}
           <Card className="absolute inset-0 w-full h-full p-6 flex flex-col justify-between backface-hidden border-2 border-primary/20 bg-card">
             <div className="flex justify-between items-center">
               <Badge variant="outline">{currentItem.sourceLang}</Badge>
@@ -100,7 +94,7 @@ export function PracticeView({ items, onReview }: Props) {
             </div>
           </Card>
 
-          {/* Back Card */}
+          {/* Обратная сторона */}
           <Card className="absolute inset-0 w-full h-full p-6 flex flex-col justify-between backface-hidden rotate-y-180 border-2 border-emerald-500/30 bg-card">
             <div className="flex justify-between items-center">
               <Badge variant="secondary">Перевод</Badge>
@@ -128,37 +122,30 @@ export function PracticeView({ items, onReview }: Props) {
             </div>
 
             <div className="text-xs text-center text-muted-foreground">
-              Выберите оценку ниже
+              Выберите результат ниже
             </div>
           </Card>
         </div>
       </div>
 
       {isFlipped && (
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3">
           <Button
-            variant="destructive"
-            className="w-full flex flex-col gap-0.5 py-6"
-            onClick={() => handleGrade('again')}
+            variant="outline"
+            className="w-full flex flex-col gap-0.5 py-6 border-amber-500/50 hover:bg-amber-500/10 text-amber-600 dark:text-amber-400"
+            onClick={() => handleDecision('repeat')}
           >
-            <span className="font-bold">Забыл</span>
-            <span className="text-[10px] opacity-80">&lt; 1 мин</span>
+            <span className="font-bold">Повторить позже</span>
+            <span className="text-[10px] opacity-80">Оставить в изучении</span>
           </Button>
-          <Button
-            variant="secondary"
-            className="w-full flex flex-col gap-0.5 py-6 border-amber-500/50 hover:bg-amber-500/10"
-            onClick={() => handleGrade('hard')}
-          >
-            <span className="font-bold text-amber-600 dark:text-amber-400">Трудно</span>
-            <span className="text-[10px] opacity-80">1 день</span>
-          </Button>
+
           <Button
             variant="default"
             className="w-full flex flex-col gap-0.5 py-6 bg-emerald-600 hover:bg-emerald-700 text-white"
-            onClick={() => handleGrade('easy')}
+            onClick={() => handleDecision('mastered')}
           >
-            <span className="font-bold">Легко</span>
-            <span className="text-[10px] opacity-80">3-7 дней</span>
+            <span className="font-bold">Знаю</span>
+            <span className="text-[10px] opacity-80">В выученные</span>
           </Button>
         </div>
       )}

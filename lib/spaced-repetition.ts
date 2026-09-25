@@ -31,17 +31,17 @@ export const calculateNextReview = (
       ...word,
       status: 'learning',
       intervalDays: 0,
-      nextReviewDate: NOW + 60 * 1000, // 1 minute
+      nextReviewDate: NOW + 60 * 1000, // +1 минута
     }
   }
 
   if (grade === 'hard') {
-    newInterval = Math.max(1, Math.round(word.intervalDays * 1.5))
+    newInterval = 1 // +1 день
     newStatus = 'learning'
   }
 
   if (grade === 'easy') {
-    newInterval = word.intervalDays === 0 ? 3 : Math.round(word.intervalDays * 2.5)
+    newInterval = word.intervalDays === 0 ? 4 : word.intervalDays + 4 // +4 дня 
     newStatus = newInterval >= 14 ? 'mastered' : 'learning'
   }
 
@@ -53,9 +53,6 @@ export const calculateNextReview = (
   }
 }
 
-/**
- * Safe date formatter ensuring NO Hydration Mismatch between SSR and CSR.
- */
 export const formatTimestamp = (timestamp: number): string => {
   const d = new Date(timestamp)
   const year = d.getUTCFullYear()

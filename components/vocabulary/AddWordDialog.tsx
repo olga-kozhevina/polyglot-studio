@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { VocabularyItem } from '@/store/useVocabularyStore'
+import { LanguageCode } from '@/types/vocabulary'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,7 +16,7 @@ interface Props {
 
 export function AddWordDialog({ onAdd }: Props) {
   const [open, setOpen] = useState(false)
-  const [sourceLang, setSourceLang] = useState<string>('EN')
+  const [sourceLang, setSourceLang] = useState<LanguageCode>('EN')
 
   const handleSubmit = (formData: FormData) => {
     const original = formData.get('original') as string
@@ -59,7 +60,7 @@ export function AddWordDialog({ onAdd }: Props) {
 
           <div className="space-y-2">
             <Label>Изучаемый язык</Label>
-            <Select value={sourceLang} onValueChange={setSourceLang}>
+            <Select value={sourceLang} onValueChange={(val) => setSourceLang(val as LanguageCode)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
