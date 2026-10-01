@@ -3,7 +3,6 @@
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
 
-// Импортируем компонент БЕЗ SSR
 const ReaderContent = dynamic(() => import('@/app/reader/ReaderContent'), {
   ssr: false,
   loading: () => (

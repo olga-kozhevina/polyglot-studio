@@ -9,7 +9,7 @@ interface ReaderClientWrapperProps {
     id: string;
     title: string;
     level: string;
-    targetLanguage: TargetLanguage; // Используем строго строгий тип языка
+    targetLanguage: TargetLanguage; 
   };
   children: React.ReactNode;
 }

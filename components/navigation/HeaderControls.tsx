@@ -1,11 +1,11 @@
 'use client'
 
-import { useSyncExternalStore } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useSettingsStore, TargetLanguage } from '@/store/useSettingsStore'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { UserNav } from '@/components/layout/UserNav'
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,21 +20,12 @@ const TARGET_LANGUAGES: { code: TargetLanguage; label: string }[] = [
   { code: 'TR', label: 'Türkçe' },
 ]
 
-// Пустая функция подписки
-const subscribe = () => () => { }
-
 export function HeaderControls() {
   const router = useRouter()
   const pathname = usePathname()
 
-  // Подписка на клиентский флаг БЕЗ вызова setState (не вызывает ошибку React 19!)
-  const isClient = useSyncExternalStore(
-    subscribe,
-    () => true,
-    () => false
-  )
-
   const { targetLanguage, setTargetLanguage } = useSettingsStore()
+  const hasHydrated = useSettingsStore((state) => state._hasHydrated);
 
   const currentLang =
     TARGET_LANGUAGES.find((lang) => lang.code === targetLanguage) || TARGET_LANGUAGES[0]
@@ -47,7 +38,16 @@ export function HeaderControls() {
     if (isInsideSpecificLesson) {
       router.push('/reader')
     }
+  }
 
+  if (!hasHydrated) {
+    return (
+      <div className="flex items-center gap-2 min-[400px]:gap-3 shrink-0">
+        <Skeleton className="h-9 w-[170px] min-[400px]:w-[185px] rounded-lg" />
+        <Skeleton className="h-9 w-9 rounded-md" />
+        <Skeleton className="h-9 w-9 rounded-full" />
+      </div>
+    )
   }
 
   return (
@@ -65,8 +65,7 @@ export function HeaderControls() {
               <div className="flex items-center gap-1 min-w-0">
                 <Globe className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                 <span className="truncate">
-                  {/* Если рендерится на сервере — показываем пустую строку/заглушку, чтобы не рендерить 'English' */}
-                  {isClient ? currentLang.label : ''}
+                  {currentLang.label}
                 </span>
               </div>
               <ChevronDown className="h-3 w-3 opacity-60 shrink-0" />

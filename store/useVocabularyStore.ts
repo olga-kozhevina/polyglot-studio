@@ -19,6 +19,10 @@ export interface VocabularyItem {
 }
 
 interface VocabularyState {
+    // Флаг гидратации storage
+  _hasHydrated: boolean;
+  setHasHydrated: (state: boolean) => void;
+
   items: VocabularyItem[];
   sessionQueue: VocabularyItem[];
   activeCustomIds: string[]; // Список ID текущей активной сессии
@@ -52,6 +56,9 @@ const getCurrentUserKey = (): string | null => {
 export const useVocabularyStore = create<VocabularyState>()(
   persist(
     (set, get) => ({
+      _hasHydrated: false,
+      setHasHydrated: (state) => set({ _hasHydrated: state }),
+
       items: [],
       sessionQueue: [],
       activeCustomIds: [],
@@ -249,6 +256,7 @@ export const useVocabularyStore = create<VocabularyState>()(
       onRehydrateStorage: () => (state) => {
         // Сразу после восстановления из localStorage синхронизируем данные текущего пользователя
         if (state) {
+          state.setHasHydrated(true);
           state.syncUserVocabulary();
         }
       },

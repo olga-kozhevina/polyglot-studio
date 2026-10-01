@@ -118,14 +118,14 @@ export function VocabularyTable({ items, onDelete, onStartCustomPractice, onUpda
         </div>
       </div>
 
-      <div className="rounded-xl border bg-card overflow-hidden shadow-sm w-full">
+      <div className="rounded-xl border bg-card overflow-hidden shadow-sm w-full px-0.5 sm:px-0">
         <Table className="w-full table-fixed">
           <TableHeader>
             <TableRow className="bg-muted/60 hover:bg-muted/60">
-              <TableHead className="font-semibold text-foreground py-3 pl-3 sm:pl-6 w-[45%] sm:w-[35%] text-xs sm:text-sm">Слово</TableHead>
-              <TableHead className="font-semibold text-foreground py-3 w-[45%] sm:w-[45%] text-xs sm:text-sm">Перевод</TableHead>
+              <TableHead className="font-semibold text-foreground py-3 pl-3.5 sm:pl-6 w-[42%] sm:w-[35%] text-xs sm:text-sm">Слово</TableHead>
+              <TableHead className="font-semibold text-foreground py-3 w-[42%] sm:w-[45%] text-xs sm:text-sm">Перевод</TableHead>
               <TableHead className="hidden sm:table-cell font-semibold text-foreground py-3 w-[20%]">Статус</TableHead>
-              <TableHead className="text-right font-semibold text-foreground py-3 pr-3 sm:pr-6 w-[20%] text-xs sm:text-sm">Удалить</TableHead>
+              <TableHead className="text-right font-semibold text-foreground py-3 pr-3.5 sm:pr-6 w-[20%] text-xs sm:text-sm">Удалить</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -203,7 +203,7 @@ export function VocabularyTable({ items, onDelete, onStartCustomPractice, onUpda
                 <span className="text-xs font-bold text-primary uppercase tracking-wider">Изменить статус изучения:</span>
               </div>
               
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 min-[500px]:grid-cols-3 gap-2">
                 <Button
                   size="sm"
                   variant={selectedItem?.status === 'new' ? 'default' : 'outline'}
@@ -213,7 +213,7 @@ export function VocabularyTable({ items, onDelete, onStartCustomPractice, onUpda
                       setSelectedItem({ ...selectedItem, status: 'new' })
                     }
                   }}
-                  className={`h-9 text-xs gap-1.5 font-medium ${
+                  className={`h-9 text-xs gap-1.5 font-medium cursor-pointer ${
                     selectedItem?.status === 'new'
                       ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm'
                       : 'border-blue-500/30 text-blue-600 dark:text-blue-400 hover:bg-blue-500/10'
@@ -232,7 +232,7 @@ export function VocabularyTable({ items, onDelete, onStartCustomPractice, onUpda
                       setSelectedItem({ ...selectedItem, status: 'learning' })
                     }
                   }}
-                  className={`h-9 text-xs gap-1.5 font-medium ${
+                  className={`h-9 text-xs gap-1.5 font-medium cursor-pointer ${
                     selectedItem?.status === 'learning'
                       ? 'bg-amber-600 hover:bg-amber-700 text-white shadow-sm'
                       : 'border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10'
@@ -251,7 +251,7 @@ export function VocabularyTable({ items, onDelete, onStartCustomPractice, onUpda
                       setSelectedItem({ ...selectedItem, status: 'mastered' })
                     }
                   }}
-                  className={`h-9 text-xs gap-1.5 font-medium ${
+                  className={`h-9 text-xs gap-1.5 font-medium cursor-pointer ${
                     selectedItem?.status === 'mastered'
                       ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm'
                       : 'border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10'

@@ -1,15 +1,17 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useVocabularyStore, MasteryStatus } from '@/store/useVocabularyStore'
+import { useVocabularyStore } from '@/store/useVocabularyStore'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useSettingsStore } from '@/store/useSettingsStore'
+import { useReaderStore } from '@/store/useReaderStore'
 import { GuestEmptyState } from '@/components/vocabulary/GuestEmptyState'
 import { VocabularyTable } from '@/components/vocabulary/VocabularyTable'
 import { PracticeView } from '@/components/vocabulary/PracticeView'
 import { AddWordDialog } from '@/components/vocabulary/AddWordDialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { BookOpen, BrainCircuit } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function VocabularyPage() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
@@ -18,6 +20,7 @@ export default function VocabularyPage() {
   const items = useVocabularyStore((s) => s.items)
   const sessionQueue = useVocabularyStore((s) => s.sessionQueue)
   const syncUserVocabulary = useVocabularyStore((s) => s.syncUserVocabulary)
+  const hasHydrated = useReaderStore((state) => state._hasHydrated);
 
   const addItem = useVocabularyStore((s) => s.addItem)
   const removeItem = useVocabularyStore((s) => s.removeItem)
@@ -34,6 +37,21 @@ export default function VocabularyPage() {
       syncUserVocabulary()
     }
   }, [isAuthenticated, syncUserVocabulary])
+
+  if (!hasHydrated) {
+    return (
+      <div className="container max-w-6xl py-6 space-y-6">
+        <div className="space-y-2">
+          <Skeleton className="h-9 w-64" />
+          <Skeleton className="h-4 w-48" />
+        </div>
+        <div className="rounded-xl border p-4 space-y-4 bg-card">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-72 w-full" />
+        </div>
+      </div>
+    )
+  }
 
   if (!isAuthenticated) {
     return <GuestEmptyState />
@@ -59,7 +77,7 @@ export default function VocabularyPage() {
             Всего слов: <span className="font-semibold text-foreground">{totalWords}</span> • К повторению: <span className="font-semibold text-primary">{filteredQueueByLang.length}</span>
           </p>
         </div>
-        <AddWordDialog onAdd={addItem} />
+        {activeTab === 'list' && <AddWordDialog onAdd={addItem} />}
       </div>
 
       <Tabs

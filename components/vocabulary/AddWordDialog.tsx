@@ -1,21 +1,43 @@
 'use client'
 
 import { useState } from 'react'
-import { VocabularyItem, LanguageCode } from '@/store/useVocabularyStore'
+import { VocabularyItem } from '@/store/useVocabularyStore'
+import { useSettingsStore, TargetLanguage } from '@/store/useSettingsStore'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus } from 'lucide-react'
 
 interface Props {
-  onAdd: (item: Omit<VocabularyItem, 'id' | 'createdAt' | 'status' | 'nextReviewDate' | 'intervalDays' | 'easeFactor'>) => void
+  onAdd: (item: Omit<VocabularyItem, 'id' | 'createdAt' | 'status'>) => void
+}
+
+// Конфиг с примерами под каждый поддерживаемый язык
+const PLACEHOLDERS: Record<TargetLanguage, { word: string; translation: string; context: string }> = {
+  EN: {
+    word: 'Например: resilience',
+    translation: 'Например: стойкость',
+    context: 'Например: She showed great resilience in tough times.',
+  },
+  FR: {
+    word: 'Например: par exemple',
+    translation: 'Например: например',
+    context: "Например: C'est un bel exemple.",
+  },
+  TR: {
+    word: 'Например: kelime',
+    translation: 'Например: слово',
+    context: 'Например: Yeni bir kelime öğrendim.',
+  },
 }
 
 export function AddWordDialog({ onAdd }: Props) {
   const [open, setOpen] = useState(false)
-  const [sourceLang, setSourceLang] = useState<LanguageCode>('EN')
+  const targetLanguage = useSettingsStore((s) => s.targetLanguage)
+
+  // Получаем примеры для текущего языка
+  const currentPlaceholder = PLACEHOLDERS[targetLanguage] || PLACEHOLDERS.EN
 
   const handleSubmit = (formData: FormData) => {
     const original = formData.get('original') as string
@@ -27,7 +49,7 @@ export function AddWordDialog({ onAdd }: Props) {
     onAdd({
       original: original.trim(),
       translation: translation.trim(),
-      sourceLang,
+      sourceLang: targetLanguage,
       targetLang: 'RU',
       contextSentence: contextSentence ? contextSentence.trim() : undefined,
     })
@@ -38,49 +60,49 @@ export function AddWordDialog({ onAdd }: Props) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" /> Добавить слово
+        <Button className="gap-2 cursor-pointer">
+          <Plus className="h-4 w-4" /> Добавить слово ({targetLanguage})
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Добавить слово в словарь</DialogTitle>
+          <DialogTitle>Добавить слово в словарь ({targetLanguage})</DialogTitle>
         </DialogHeader>
         <form action={handleSubmit} className="space-y-4 pt-2">
           <div className="space-y-2">
             <Label htmlFor="original">Слово / Фраза</Label>
-            <Input id="original" name="original" required placeholder="Например: hydration" />
+            <Input 
+              id="original" 
+              name="original" 
+              required 
+              placeholder={currentPlaceholder.word} 
+            />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="translation">Перевод (на русский)</Label>
-            <Input id="translation" name="translation" required placeholder="Например: гидратация" />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Изучаемый язык</Label>
-            <Select value={sourceLang} onValueChange={(val) => setSourceLang(val as LanguageCode)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="EN">Английский (EN)</SelectItem>
-                <SelectItem value="FR">Французский (FR)</SelectItem>
-                <SelectItem value="TR">Турецкий (TR)</SelectItem>
-              </SelectContent>
-            </Select>
+            <Input 
+              id="translation" 
+              name="translation" 
+              required 
+              placeholder={currentPlaceholder.translation} 
+            />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="contextSentence">Контекстное предложение (опционально)</Label>
-            <Input id="contextSentence" name="contextSentence" placeholder="Пример из текста..." />
+            <Input 
+              id="contextSentence" 
+              name="contextSentence" 
+              placeholder={currentPlaceholder.context} 
+            />
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)} className="cursor-pointer">
               Отмена
             </Button>
-            <Button type="submit">Сохранить</Button>
+            <Button type="submit" className="cursor-pointer">Сохранить</Button>
           </div>
         </form>
       </DialogContent>

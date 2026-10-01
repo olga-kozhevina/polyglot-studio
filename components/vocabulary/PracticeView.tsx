@@ -127,7 +127,6 @@ export function PracticeView({ items, onReview }: Props) {
             onClick={() => handleDecision('repeat')}
           >
             <span className="font-bold">Повторить позже</span>
-            <span className="text-[10px] opacity-80">Оставить в изучении</span>
           </Button>
 
           <Button
@@ -136,7 +135,6 @@ export function PracticeView({ items, onReview }: Props) {
             onClick={() => handleDecision('mastered')}
           >
             <span className="font-bold">Знаю</span>
-            <span className="text-[10px] opacity-80">В выученные</span>
           </Button>
         </div>
       )}
