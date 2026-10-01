@@ -4,10 +4,13 @@ import { useAuthStore } from './useAuthStore';
 
 export type MasteryStatus = 'new' | 'learning' | 'mastered';
 
+export type LanguageCode = 'EN' | 'FR' | 'TR'
+
 export interface VocabularyItem {
   id: string;
   original: string;
   translation: string;
+  transcription?: string;
   contextSentence?: string;
   sourceLang: string; // 'EN' | 'FR' | 'TR'
   targetLang: string; // 'RU'
@@ -30,6 +33,7 @@ interface VocabularyState {
   ) => void;
   removeItem: (id: string) => void;
   reviewItem: (id: string, decision: 'repeat' | 'mastered') => void;
+  updateItemStatus: (id: string, status: MasteryStatus) => void;
 
   // Методы запуска тренировок
   startPracticeSession: () => void;
@@ -160,6 +164,39 @@ export const useVocabularyStore = create<VocabularyState>()(
           },
         }));
       },
+
+      updateItemStatus: (id, newStatus) => {
+    const userKey = getCurrentUserKey();
+    if (!userKey) return;
+
+    const currentItems = get().userItems[userKey] || [];
+
+    const updatedItems = currentItems.map((item) => {
+      if (item.id !== id) return item;
+      return {
+        ...item,
+        status: newStatus,
+      };
+    });
+
+    // Также обновляем слово в очереди сессии, если оно там есть
+    const updatedQueue = get().sessionQueue.map((item) => {
+      if (item.id !== id) return item;
+      return {
+        ...item,
+        status: newStatus,
+      };
+    });
+
+    set((state) => ({
+      items: updatedItems,
+      sessionQueue: updatedQueue,
+      userItems: {
+        ...state.userItems,
+        [userKey]: updatedItems,
+      },
+    }));
+  },
 
       startPracticeSession: () => {
         set({ sessionQueue: [], activeCustomIds: [] });

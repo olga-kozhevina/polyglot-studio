@@ -1,12 +1,18 @@
-const translationCache = new Map<string, string>();
+export interface TranslationResult {
+  translation: string;
+  transcription?: string;
+  audioUrl?: string;
+}
+
+const translationCache = new Map<string, TranslationResult>();
 
 export async function fetchTranslation(
   text: string,
   sourceLang: string,
   targetLang: string = 'ru'
-): Promise<string> {
+): Promise<TranslationResult> {
   const cleanText = text.trim();
-  if (!cleanText) return '';
+  if (!cleanText) return { translation: '' };
 
   const src = sourceLang.toLowerCase();
   const tgt = targetLang.toLowerCase();
@@ -23,20 +29,21 @@ export async function fetchTranslation(
     );
 
     if (!res.ok) {
-      const errorData = await res.json().catch(() => ({}));
-      console.error('Server Translation Error:', res.status, errorData);
-      return 'Ошибка перевода';
+      return { translation: 'Ошибка перевода' };;
     }
 
     const data = await res.json();
-    const result = data.translation || 'Перевод не найден';
+    const result: TranslationResult = {
+      translation: data.translation || 'Перевод не найден',
+      transcription: data.transcription || undefined,
+      audioUrl: data.audioUrl || undefined,
+    };
 
     // 2. Запоминаем в кэше
     translationCache.set(cacheKey, result);
-
     return result;
   } catch (error) {
     console.error('Network Translation Error:', error);
-    return 'Ошибка сети';
+    return { translation: 'Ошибка сети' };
   }
 }

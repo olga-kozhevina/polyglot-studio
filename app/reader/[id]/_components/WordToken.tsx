@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 // import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { fetchTranslation } from '@/lib/translate';
+import { fetchTranslation, TranslationResult } from '@/lib/translate';
 import { useVocabularyStore } from '@/store/useVocabularyStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useReaderStore } from '@/store/useReaderStore';
@@ -23,7 +23,7 @@ export function WordToken({ tokenId, word, fullSentence }: WordTokenProps) {
     const activePopoverId = useReaderStore((state) => state.activePopoverId);
     const setActivePopoverId = useReaderStore((state) => state.setActivePopoverId);
 
-    const [translation, setTranslation] = useState<string>('');
+    const [translationData, setTranslationData] = useState<TranslationResult | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     // const [isAuthDialogOpen, setIsAuthDialogOpen] = useState<boolean>(false);
 
@@ -44,10 +44,10 @@ export function WordToken({ tokenId, word, fullSentence }: WordTokenProps) {
 
         if (open) {
             setActivePopoverId(tokenId);
-            if (!translation && cleanWord) {
+            if (!translationData && cleanWord) {
                 setLoading(true);
                 const res = await fetchTranslation(cleanWord, targetLanguage, 'ru');
-                setTranslation(res);
+                setTranslationData(res);
                 setLoading(false);
             }
         } else {
@@ -65,7 +65,8 @@ export function WordToken({ tokenId, word, fullSentence }: WordTokenProps) {
         if (!isSaved && cleanWord) {
             addItem({
                 original: cleanWord,
-                translation: translation || '—',
+                translation: translationData?.translation || '—',
+                transcription: translationData?.transcription,
                 contextSentence: fullSentence,
                 sourceLang: targetLanguage,
                 targetLang: 'ru',
@@ -119,7 +120,7 @@ export function WordToken({ tokenId, word, fullSentence }: WordTokenProps) {
                                     <Loader2 className="h-3 w-3 animate-spin" /> Переводим...
                                 </div>
                             ) : (
-                                <span className="text-foreground">{translation}</span>
+                                <span className="text-foreground">{translationData?.translation || '—'}</span>
                             )}
                         </div>
 

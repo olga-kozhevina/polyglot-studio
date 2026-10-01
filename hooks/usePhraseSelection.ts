@@ -55,7 +55,7 @@ export function usePhraseSelection() {
         setIsTranslating(true);
         try {
             const res = await fetchTranslation(cleanText, targetLanguage, 'ru');
-            setTranslation(res);
+            setTranslation(res.translation);
         } catch {
             setTranslation('Ошибка перевода');
         } finally {
