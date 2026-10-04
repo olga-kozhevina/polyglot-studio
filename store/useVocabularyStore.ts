@@ -1,10 +1,11 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { useStatsStore } from './useStatsStore';
 import { useAuthStore } from './useAuthStore';
 
 export type MasteryStatus = 'new' | 'learning' | 'mastered';
 
-export type LanguageCode = 'EN' | 'FR' | 'TR'
+export type LanguageCode = 'EN' | 'FR' | 'TR';
 
 export interface VocabularyItem {
   id: string;
@@ -19,7 +20,7 @@ export interface VocabularyItem {
 }
 
 interface VocabularyState {
-    // Флаг гидратации storage
+  // Флаг гидратации storage
   _hasHydrated: boolean;
   setHasHydrated: (state: boolean) => void;
 
@@ -72,7 +73,7 @@ export const useVocabularyStore = create<VocabularyState>()(
         }
         const currentUserWords = get().userItems[userKey] || [];
 
-        // Если в localStorage уже есть сохраненная очередь тренировки (хвост), 
+        // Если в localStorage уже есть сохраненная очередь тренировки (хвост),
         // просто синхронизируем данные слов с актуальным списком пользователя
         const currentQueue = get().sessionQueue;
         if (currentQueue.length > 0) {
@@ -80,13 +81,13 @@ export const useVocabularyStore = create<VocabularyState>()(
             .map((qItem) => currentUserWords.find((w) => w.id === qItem.id))
             .filter((w): w is VocabularyItem => w !== undefined);
 
-        set({
-          items: currentUserWords,
-          sessionQueue: syncedQueue,
-        });
+          set({
+            items: currentUserWords,
+            sessionQueue: syncedQueue,
+          });
           return;
         }
-        
+
         set({ items: currentUserWords });
       },
 
@@ -146,6 +147,13 @@ export const useVocabularyStore = create<VocabularyState>()(
 
           const newStatus: MasteryStatus = decision === 'mastered' ? 'mastered' : 'learning';
 
+          // Отмечаем уникальное слово как освоенное в статистике
+          if (decision === 'mastered') {
+            useStatsStore
+              .getState()
+              .markWordAsMastered(item.sourceLang as 'EN' | 'FR' | 'TR', item.id);
+          }
+
           return {
             ...item,
             status: newStatus,
@@ -173,37 +181,45 @@ export const useVocabularyStore = create<VocabularyState>()(
       },
 
       updateItemStatus: (id, newStatus) => {
-    const userKey = getCurrentUserKey();
-    if (!userKey) return;
+        const userKey = getCurrentUserKey();
+        if (!userKey) return;
 
-    const currentItems = get().userItems[userKey] || [];
+        const currentItems = get().userItems[userKey] || [];
 
-    const updatedItems = currentItems.map((item) => {
-      if (item.id !== id) return item;
-      return {
-        ...item,
-        status: newStatus,
-      };
-    });
+        const updatedItems = currentItems.map((item) => {
+          if (item.id !== id) return item;
 
-    // Также обновляем слово в очереди сессии, если оно там есть
-    const updatedQueue = get().sessionQueue.map((item) => {
-      if (item.id !== id) return item;
-      return {
-        ...item,
-        status: newStatus,
-      };
-    });
+          // Отмечаем уникальное слово как освоенное в статистике
+          if (newStatus === 'mastered') {
+            useStatsStore
+              .getState()
+              .markWordAsMastered(item.sourceLang as 'EN' | 'FR' | 'TR', item.id);
+          }
 
-    set((state) => ({
-      items: updatedItems,
-      sessionQueue: updatedQueue,
-      userItems: {
-        ...state.userItems,
-        [userKey]: updatedItems,
+          return {
+            ...item,
+            status: newStatus,
+          };
+        });
+
+        // Также обновляем слово в очереди сессии, если оно там есть
+        const updatedQueue = get().sessionQueue.map((item) => {
+          if (item.id !== id) return item;
+          return {
+            ...item,
+            status: newStatus,
+          };
+        });
+
+        set((state) => ({
+          items: updatedItems,
+          sessionQueue: updatedQueue,
+          userItems: {
+            ...state.userItems,
+            [userKey]: updatedItems,
+          },
+        }));
       },
-    }));
-  },
 
       startPracticeSession: () => {
         set({ sessionQueue: [], activeCustomIds: [] });
@@ -218,7 +234,7 @@ export const useVocabularyStore = create<VocabularyState>()(
 
         set({
           sessionQueue: queue,
-          activeCustomIds: itemIds
+          activeCustomIds: itemIds,
         });
       },
 

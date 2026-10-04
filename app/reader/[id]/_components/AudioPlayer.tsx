@@ -2,6 +2,8 @@
 
 import { useRef, useEffect } from 'react';
 import { useReaderStore } from '@/store/useReaderStore';
+import { useStatsStore } from '@/store/useStatsStore';
+import { useSettingsStore, TargetLanguage } from '@/store/useSettingsStore';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Play, Pause, Undo2 } from 'lucide-react';
@@ -16,6 +18,11 @@ const RATES = [0.75, 1.0, 1.25, 1.5];
 export const AudioPlayer = ({ audioUrl }: AudioPlayerProps) => {
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
+    // --- Рефы для статистики ---
+    const accumulatedSeconds = useRef(0);
+    // Строгая типизация таймера, чтобы TS не ругался на NodeJS.Timeout в браузере
+    const syncInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+
     const {
         isPlaying,
         currentTime,
@@ -26,6 +33,10 @@ export const AudioPlayer = ({ audioUrl }: AudioPlayerProps) => {
         setDuration,
         setPlaybackRate,
     } = useReaderStore();
+
+    // --- Получаем данные из сторов ---
+    const { targetLanguage } = useSettingsStore();
+    const addListeningTime = useStatsStore((state) => state.addListeningTime);
 
     // Сброс состояния воспроизведения при открытии любой страницы с плеером
     useEffect(() => {
@@ -72,6 +83,42 @@ export const AudioPlayer = ({ audioUrl }: AudioPlayerProps) => {
     }
         }
     }, [playbackRate]);
+
+    // --- ЛОГИКА ОТСЛЕЖИВАНИЯ ВРЕМЕНИ ПРОСЛУШИВАНИЯ ---
+    useEffect(() => {
+        if (isPlaying) {
+            // Если музыка играет, запускаем счетчик
+            syncInterval.current = setInterval(() => {
+                accumulatedSeconds.current += 1;
+                
+                // Каждые 10 секунд сбрасываем накопленное в стор
+                if (accumulatedSeconds.current >= 10) {
+                    addListeningTime(accumulatedSeconds.current, targetLanguage as TargetLanguage);
+                    accumulatedSeconds.current = 0;
+                }
+            }, 1000);
+        } else {
+            // Если поставили на паузу — сохраняем остатки
+            if (accumulatedSeconds.current > 0) {
+                addListeningTime(accumulatedSeconds.current, targetLanguage as TargetLanguage);
+                accumulatedSeconds.current = 0;
+            }
+            if (syncInterval.current) {
+                clearInterval(syncInterval.current);
+            }
+        }
+
+        // Очистка при размонтировании (когда плеер закрывается/уходим со страницы)
+        return () => {
+            if (syncInterval.current) {
+                clearInterval(syncInterval.current);
+            }
+            if (accumulatedSeconds.current > 0) {
+                addListeningTime(accumulatedSeconds.current, targetLanguage as TargetLanguage);
+                accumulatedSeconds.current = 0;
+            }
+        };
+    }, [isPlaying, targetLanguage, addListeningTime]);
 
     // Обработчики кнопок
     const togglePlay = () => {
