@@ -8,6 +8,7 @@ import { usePhraseSelection } from '@/hooks/usePhraseSelection';
 import { Popover, PopoverContent, PopoverAnchor } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { GuestActionModal } from '@/components/auth/GuestActionModal';
 
 interface MaterialHeaderProps {
     title: string;
@@ -64,7 +65,7 @@ export function MaterialHeader({
     } = usePhraseSelection();
 
     return (
-        <div 
+        <div
             className="space-y-3 border-b pb-6 select-text selection:bg-primary/20 selection:text-foreground relative"
             onMouseUp={() => handleMouseUp()}
         >
@@ -162,22 +163,13 @@ export function MaterialHeader({
             )}
 
             {/* Диалог авторизации при попытке сохранить фразу неавторизованным пользователем */}
-            <Dialog open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen}>
-                <DialogContent className="sm:max-w-[400px]" onClick={(e) => e.stopPropagation()}>
-                    <DialogHeader>
-                        <DialogTitle>Сохранение фраз</DialogTitle>
-                        <DialogDescription className="pt-2">
-                            Войдите в аккаунт, чтобы сохранять фразы и слова в личный словарь.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter className="gap-2 sm:gap-0 mt-4">
-                        <Button variant="ghost" onClick={() => setIsAuthDialogOpen(false)}>
-                            Отмена
-                        </Button>
-                        <Button onClick={handleOpenFullAuthModal}>Войти</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            <GuestActionModal
+                isOpen={isAuthDialogOpen}
+                onClose={() => setIsAuthDialogOpen(false)}
+                title="Сохранение фразы"
+                description="Войдите в аккаунт, чтобы сохранять готовые выражения из текста."
+                cancelText="Продолжить чтение"
+            />
         </div>
     );
 }

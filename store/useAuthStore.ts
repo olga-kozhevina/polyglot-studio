@@ -1,28 +1,28 @@
-'use client'
+'use client';
 
-import { create } from 'zustand'
-import { persist, createJSONStorage } from 'zustand/middleware'
-import { useVocabularyStore } from './useVocabularyStore'
-import { useReaderStore } from './useReaderStore'
+import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import { useVocabularyStore } from './useVocabularyStore';
+import { useReaderStore } from './useReaderStore';
 
 export interface User {
-  id: string
-  email: string
-  name: string
-  avatarUrl?: string
+  id: string;
+  email: string;
+  name: string;
+  avatarUrl?: string;
 }
 
 interface AuthState {
-  user: User | null
-  isAuthenticated: boolean
-  isAuthModalOpen: boolean
-  _hasHydrated: boolean
-  setHasHydrated: (state: boolean) => void
-  openAuthModal: () => void
-  closeAuthModal: () => void
-  login: (email: string, name?: string) => void
-  loginWithGoogle: () => void
-  logout: () => void
+  user: User | null;
+  isAuthenticated: boolean;
+  isAuthModalOpen: boolean;
+  _hasHydrated: boolean;
+  setHasHydrated: (state: boolean) => void;
+  openAuthModal: () => void;
+  closeAuthModal: () => void;
+  login: (email: string, name?: string) => void;
+  loginWithGoogle: () => void;
+  logout: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -38,9 +38,9 @@ export const useAuthStore = create<AuthState>()(
       closeAuthModal: () => set({ isAuthModalOpen: false }),
 
       login: (email: string, name?: string) => {
-        const cleanEmail = email.trim().toLowerCase()
-        const userName = name?.trim() || email.split('@')[0]
-        const userId = `user_${cleanEmail}`
+        const cleanEmail = email.trim().toLowerCase();
+        const userName = name?.trim() || email.split('@')[0];
+        const userId = `user_${cleanEmail}`;
 
         set({
           user: {
@@ -51,17 +51,17 @@ export const useAuthStore = create<AuthState>()(
           },
           isAuthenticated: true,
           isAuthModalOpen: false,
-        })
-        // Подгружаем словарь вошедшего юзера
-        useVocabularyStore.getState().syncUserVocabulary()
+        });
 
-        // Синхронизируем и переносим сессии ридера для вошедшего юзера
-        useReaderStore.getState().syncUserReaderSession(userId)
+        // Безопасная синхронизация после изменения состояния
+        queueMicrotask(() => {
+          useVocabularyStore.getState().syncUserVocabulary();
+          useReaderStore.getState().syncUserReaderSession(userId);
+        });
       },
 
       loginWithGoogle: () => {
-        const googleUserId = 'google_user_777'
-
+        const googleUserId = 'google_user_777';
         set({
           user: {
             id: googleUserId,
@@ -71,12 +71,12 @@ export const useAuthStore = create<AuthState>()(
           },
           isAuthenticated: true,
           isAuthModalOpen: false,
-        })
-        // Подгружаем словарь Google-аккаунта
-        useVocabularyStore.getState().syncUserVocabulary()
+        });
 
-        // Синхронизируем и переносим сессии ридера для Google-юзера
-        useReaderStore.getState().syncUserReaderSession(googleUserId)
+        queueMicrotask(() => {
+          useVocabularyStore.getState().syncUserVocabulary();
+          useReaderStore.getState().syncUserReaderSession(googleUserId);
+        });
       },
 
       logout: () => {
@@ -84,13 +84,13 @@ export const useAuthStore = create<AuthState>()(
           user: null,
           isAuthenticated: false,
           isAuthModalOpen: false,
-        })
-        // Синхронизируем словарь (для гостя массив items станет пустым, но сохраненные слова НЕ удлятся!)
-        useVocabularyStore.getState().syncUserVocabulary()
+        });
 
-        // Переключаем ридер на гостевой режим (чистая сессия) и сбрасываем плеер
-        useReaderStore.getState().syncUserReaderSession(null)
-        useReaderStore.getState().resetReaderState()
+        queueMicrotask(() => {
+          useVocabularyStore.getState().syncUserVocabulary();
+          useReaderStore.getState().syncUserReaderSession(null);
+          useReaderStore.getState().resetReaderState();
+        });
       },
     }),
     {
@@ -101,14 +101,16 @@ export const useAuthStore = create<AuthState>()(
         isAuthenticated: state.isAuthenticated,
       }),
       onRehydrateStorage: () => (state) => {
-        state?.setHasHydrated(true)
-        // Синхронизируем словарь после гидрации auth-стора из localStorage
-        setTimeout(() => {
-          const userId = useAuthStore.getState().user?.id || null
-          useVocabularyStore.getState().syncUserVocabulary()
-          useReaderStore.getState().syncUserReaderSession(userId)
-        }, 0)
+        // 1. Сначала говорим, что гидрация прошла
+        state?.setHasHydrated(true);
+
+        // 2. Через queueMicrotask синхронизируем смежные сторы ПОСЛЕ завершения текущего цикла событий
+        queueMicrotask(() => {
+          const userId = useAuthStore.getState().user?.id || null;
+          useVocabularyStore.getState().syncUserVocabulary();
+          useReaderStore.getState().syncUserReaderSession(userId);
+        });
       },
     }
   )
-)
+);

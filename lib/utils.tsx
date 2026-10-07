@@ -72,3 +72,25 @@ export const SERVICE_WORDS: Record<string, Record<string, string>> = {
     ne: 'что',
   },
 };
+
+export const highlightWordInContext = (sentence?: string, word?: string) => {
+  if (!sentence) return null
+  if (!word) return sentence
+
+  const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const regex = new RegExp(`(${escapedWord})`, 'gi')
+  const parts = sentence.split(regex)
+
+  return parts.map((part, i) =>
+    part.toLowerCase() === word.toLowerCase() ? (
+      <span
+        key={i}
+        className="text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded mx-0.5 inline-block"
+      >
+        {part}
+      </span>
+    ) : (
+      part
+    )
+  )
+}

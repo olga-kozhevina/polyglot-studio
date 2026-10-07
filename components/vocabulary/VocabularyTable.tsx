@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useDeferredValue } from 'react'
+import { useState, useDeferredValue, useMemo } from 'react'
 import { VocabularyItem, MasteryStatus } from '@/store/useVocabularyStore'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Input } from '@/components/ui/input'
@@ -9,8 +9,9 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Trash2, Search, Filter, BrainCircuit, CheckCircle2, Clock, Sparkles } from 'lucide-react'
+import { highlightWordInContext } from '@/lib/utils'
 
-interface Props { 
+interface Props {
   items: VocabularyItem[]
   onDelete: (id: string) => void
   onStartCustomPractice: (itemIds: string[]) => void
@@ -20,46 +21,22 @@ interface Props {
 export function VocabularyTable({ items, onDelete, onStartCustomPractice, onUpdateStatus }: Props) {
   const [search, setSearch] = useState('')
   const deferredSearch = useDeferredValue(search)
-
   const [statusFilter, setStatusFilter] = useState<string>('ALL')
-
-  // Состояние модального окна
   const [selectedItem, setSelectedItem] = useState<VocabularyItem | null>(null)
 
-  const handleOpenDetails = (item: VocabularyItem) => {
-    setSelectedItem(item)
-  }
-
-  // Функция подсветки слова в контексте
-  const highlightWordInContext = (sentence?: string, word?: string) => {
-    if (!sentence) return null
-    if (!word) return sentence
-
-    const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    const regex = new RegExp(`(${escapedWord})`, 'gi')
-    const parts = sentence.split(regex)
-
-    return parts.map((part, i) => 
-      part.toLowerCase() === word.toLowerCase() ? (
-        <span key={i} className="text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded mx-0.5 inline-block">
-          {part}
-        </span>
-      ) : (
-        part
-      )
-    )
-  }
-
-  const filteredItems = items
-    .filter((i) => {
-      const query = deferredSearch.toLowerCase()
-      const matchesSearch =
-        i.original.toLowerCase().includes(query) ||
-        i.translation.toLowerCase().includes(query)
-      const matchesStatus = statusFilter === 'ALL' || i.status === statusFilter
-      return matchesSearch && matchesStatus
-    })
-    .sort((a, b) => b.createdAt - a.createdAt)
+  const filteredItems = useMemo(() => {
+    const query = deferredSearch.toLowerCase().trim()
+    return items
+      .filter((i) => {
+        const matchesSearch =
+          !query ||
+          i.original.toLowerCase().includes(query) ||
+          i.translation.toLowerCase().includes(query)
+        const matchesStatus = statusFilter === 'ALL' || i.status === statusFilter
+        return matchesSearch && matchesStatus
+      })
+      .sort((a, b) => b.createdAt - a.createdAt)
+  }, [items, deferredSearch, statusFilter])
 
   const getStatusBadge = (s?: MasteryStatus) => {
     switch (s) {
@@ -138,9 +115,9 @@ export function VocabularyTable({ items, onDelete, onStartCustomPractice, onUpda
               </TableRow>
             ) : (
               filteredItems.map((item) => (
-                <TableRow 
-                  key={item.id} 
-                  onClick={() => handleOpenDetails(item)}
+                <TableRow
+                  key={item.id}
+                  onClick={() => setSelectedItem(item)}
                   className="cursor-pointer transition-colors hover:bg-muted/50 group"
                 >
                   <TableCell className="font-medium pl-3 sm:pl-6 py-3 truncate">
@@ -190,19 +167,17 @@ export function VocabularyTable({ items, onDelete, onStartCustomPractice, onUpda
                 <DialogTitle className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
                   {selectedItem?.original}
                 </DialogTitle>
-
                 <DialogDescription className="text-base sm:text-lg text-muted-foreground">
                   Перевод: <strong className="text-foreground font-semibold">{selectedItem?.translation}</strong>
                 </DialogDescription>
               </div>
             </div>
 
-            {/* Интерактивная смена статуса прямо в модалке с четким выделением */}
             <div className="space-y-2.5 pt-3 border-t">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-primary uppercase tracking-wider">Изменить статус изучения:</span>
               </div>
-              
+
               <div className="grid grid-cols-1 min-[500px]:grid-cols-3 gap-2">
                 <Button
                   size="sm"
@@ -264,17 +239,20 @@ export function VocabularyTable({ items, onDelete, onStartCustomPractice, onUpda
             </div>
           </DialogHeader>
 
-          {/* Контекст использования */}
           <div className="space-y-3 py-2">
             {selectedItem?.contextSentence ? (
               <div className="rounded-xl bg-muted/60 p-4 space-y-2 border">
-                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Контекст использования:</span>
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+                  Контекст использования:
+                </span>
                 <p className="text-base sm:text-lg leading-relaxed text-foreground font-normal">
                   {highlightWordInContext(selectedItem.contextSentence, selectedItem.original)}
                 </p>
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground italic text-center py-2">Контекст для этого слова не добавлен</p>
+              <p className="text-sm text-muted-foreground italic text-center py-2">
+                Контекст для этого слова не добавлен
+              </p>
             )}
           </div>
         </DialogContent>

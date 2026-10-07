@@ -1,11 +1,12 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
-import { useSettingsStore, TargetLanguage } from '@/store/useSettingsStore'
+import { useSettingsStore } from '@/store/useSettingsStore'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { UserNav } from '@/components/layout/UserNav'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Language } from '@/types/text' // Использование единого типа
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { ArrowRight, ChevronDown, Globe } from 'lucide-react'
 
-const TARGET_LANGUAGES: { code: TargetLanguage; label: string }[] = [
+const TARGET_LANGUAGES: { code: Language; label: string }[] = [
   { code: 'EN', label: 'English' },
   { code: 'FR', label: 'Français' },
   { code: 'TR', label: 'Türkçe' },
@@ -25,21 +26,20 @@ export function HeaderControls() {
   const pathname = usePathname()
 
   const { targetLanguage, setTargetLanguage } = useSettingsStore()
-  const hasHydrated = useSettingsStore((state) => state._hasHydrated);
+  const hasHydrated = useSettingsStore((state) => state._hasHydrated)
 
   const currentLang =
-    TARGET_LANGUAGES.find((lang) => lang.code === targetLanguage) || TARGET_LANGUAGES[0]
+    TARGET_LANGUAGES.find((lang) => lang.code === targetLanguage) ||
+    TARGET_LANGUAGES[0]
 
-  // Логика умного переключения языка
-  const handleLanguageChange = (newLang: TargetLanguage) => {
+  const handleLanguageChange = (newLang: Language) => {
     setTargetLanguage(newLang)
-    const isInsideSpecificLesson = pathname.startsWith('/reader/')
-
-    if (isInsideSpecificLesson) {
+    if (pathname.startsWith('/reader/')) {
       router.push('/reader')
     }
   }
 
+  // Скелетон оставляем прямо здесь — это локальная деталь реализации компонента
   if (!hasHydrated) {
     return (
       <div className="flex items-center gap-2 min-[400px]:gap-3 shrink-0">
@@ -52,9 +52,7 @@ export function HeaderControls() {
 
   return (
     <div className="flex items-center gap-2 min-[400px]:gap-3 shrink-0">
-      {/* Визуальный чип языковой пары */}
       <div className="flex items-center rounded-lg border bg-muted/40 p-1 text-sm font-medium">
-        {/* Выпадающее меню выбора изучаемого языка */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -64,9 +62,7 @@ export function HeaderControls() {
             >
               <div className="flex items-center gap-1 min-w-0">
                 <Globe className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                <span className="truncate">
-                  {currentLang.label}
-                </span>
+                <span className="truncate">{currentLang.label}</span>
               </div>
               <ChevronDown className="h-3 w-3 opacity-60 shrink-0" />
             </Button>
@@ -87,7 +83,6 @@ export function HeaderControls() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Разделительная стрелка */}
         <ArrowRight className="h-3.5 w-3.5 text-muted-foreground mx-1 shrink-0" />
 
         <div className="hidden min-[400px]:block px-2.5 py-1 text-muted-foreground font-medium text-sm leading-none whitespace-nowrap">

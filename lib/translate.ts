@@ -1,6 +1,5 @@
 export interface TranslationResult {
   translation: string;
-  transcription?: string;
   audioUrl?: string;
 }
 
@@ -29,13 +28,12 @@ export async function fetchTranslation(
     );
 
     if (!res.ok) {
-      return { translation: 'Ошибка перевода' };;
+      return { translation: 'Ошибка перевода' };
     }
 
     const data = await res.json();
     const result: TranslationResult = {
       translation: data.translation || 'Перевод не найден',
-      transcription: data.transcription || undefined,
       audioUrl: data.audioUrl || undefined,
     };
 

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useReaderStore, LastSession } from '@/store/useReaderStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { useAuthStore } from '@/store/useAuthStore';
+import { GuestActionModal } from '@/components/auth/GuestActionModal';
 import { Button } from '@/components/ui/button';
 import {
   Card,

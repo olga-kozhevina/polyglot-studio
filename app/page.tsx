@@ -19,7 +19,7 @@ export default function Home() {
       <section className="flex flex-col items-center text-center space-y-6 sm:space-y-8 pt-2">
         <Badge
           variant="secondary"
-          className="px-3.5 py-1.5 sm:px-5 sm:py-2 gap-1.5 sm:gap-2 text-[11px] sm:text-sm font-medium rounded-full border border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400 shadow-2xs max-w-full text-center"
+          className="px-3.5 py-1.5 sm:px-5 sm:py-2 gap-1.5 sm:gap-2 text-[11px] sm:text-sm font-medium rounded-full border border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400 shadow-xs max-w-full text-center"
         >
           <Sparkles className="w-3.5 h-3.5 text-blue-500 shrink-0" />
           <span className="truncate">Свобода практики без обязательной регистрации</span>
@@ -27,7 +27,7 @@ export default function Home() {
 
         <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight max-w-3xl leading-[1.15] text-foreground break-words">
           Говорите на иностранном языке{' '}
-          <span className="bg-linear-to-r from-blue-600 via-indigo-500 to-cyan-500 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-blue-600 via-indigo-500 to-cyan-500 bg-clip-text text-transparent">
             уверенно и бегло
           </span>
         </h1>
@@ -46,11 +46,12 @@ export default function Home() {
         </div>
 
         <div className="pt-2 w-full sm:w-auto">
-          <Link href="/catalog" className="w-full sm:w-auto block">
-            <Button size="lg" className="gap-2 text-sm sm:text-base px-6 sm:px-9 h-12 sm:h-13 rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer font-medium w-full sm:w-auto">
-              Перейти в каталог <ArrowRight className="w-4 h-4 shrink-0" />
-            </Button>
-          </Link>
+          <Button asChild size="lg" className="gap-2 text-sm sm:text-base px-6 sm:px-9 h-12 sm:h-13 rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer font-medium w-full sm:w-auto">
+            <Link href="/catalog">
+              <span>Перейти в каталог</span>
+              <ArrowRight className="w-4 h-4 shrink-0" />
+            </Link>
+          </Button>
         </div>
       </section>
 
@@ -62,7 +63,7 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          <Card className="bg-card/40 border hover:border-blue-500/40 transition-colors shadow-2xs flex flex-col justify-between">
+          <Card className="bg-card/40 border hover:border-blue-500/40 transition-colors shadow-xs flex flex-col justify-between">
             <CardHeader className="space-y-3 p-5 sm:p-6">
               <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
                 <Headphones className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -76,7 +77,7 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          <Card className="bg-card/40 border hover:border-blue-500/40 transition-colors shadow-2xs flex flex-col justify-between">
+          <Card className="bg-card/40 border hover:border-blue-500/40 transition-colors shadow-xs flex flex-col justify-between">
             <CardHeader className="space-y-3 p-5 sm:p-6">
               <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
                 <Mic className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -90,7 +91,7 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          <Card className="bg-card/40 border hover:border-blue-500/40 transition-colors shadow-2xs flex flex-col justify-between sm:col-span-2 lg:col-span-1">
+          <Card className="bg-card/40 border hover:border-blue-500/40 transition-colors shadow-xs flex flex-col justify-between sm:col-span-2 lg:col-span-1">
             <CardHeader className="space-y-3 p-5 sm:p-6">
               <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
                 <Volume2 className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -107,9 +108,9 @@ export default function Home() {
       </section>
 
       {/* ФИНАЛЬНЫЙ CTA */}
-      <section className="relative rounded-2xl sm:rounded-3xl border bg-linear-to-b from-blue-500/5 via-muted/30 to-muted/10 p-6 sm:p-10 md:p-12 text-center space-y-5 sm:space-y-6 overflow-hidden">
+      <section className="relative rounded-2xl sm:rounded-3xl border bg-gradient-to-b from-blue-500/5 via-muted/30 to-muted/10 p-6 sm:p-10 md:p-12 text-center space-y-5 sm:space-y-6 overflow-hidden">
         <div className="absolute -top-24 -right-24 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-        
+
         <div className="space-y-2.5 sm:space-y-3 max-w-xl mx-auto relative z-10">
           <div className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full mb-1">
             <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
@@ -124,7 +125,8 @@ export default function Home() {
         <div className="pt-1 sm:pt-2 relative z-10 w-full sm:w-auto">
           <Button asChild size="lg" className="gap-2 text-sm sm:text-base px-6 sm:px-9 h-12 sm:h-13 rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer font-medium w-full sm:w-auto">
             <Link href="/catalog" className="w-full sm:w-auto flex items-center justify-center">
-              <span>Открыть каталог материалов</span> <ArrowRight className="w-4 h-4 shrink-0" />
+              <span>Открыть каталог материалов</span>
+              <ArrowRight className="w-4 h-4 shrink-0" />
             </Link>
           </Button>
         </div>

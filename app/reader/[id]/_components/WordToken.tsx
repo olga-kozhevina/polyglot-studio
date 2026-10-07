@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-// import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { fetchTranslation, TranslationResult } from '@/lib/translate';
 import { useVocabularyStore } from '@/store/useVocabularyStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useReaderStore } from '@/store/useReaderStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
+import { GuestActionModal } from '@/components/auth/GuestActionModal';
 import { Check, Plus, Loader2, X } from 'lucide-react';
 
 interface WordTokenProps {
@@ -25,7 +26,7 @@ export function WordToken({ tokenId, word, fullSentence }: WordTokenProps) {
 
     const [translationData, setTranslationData] = useState<TranslationResult | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
-    // const [isAuthDialogOpen, setIsAuthDialogOpen] = useState<boolean>(false);
+    const [isAuthDialogOpen, setIsAuthDialogOpen] = useState<boolean>(false);
 
     const cleanWord = word.replace(/[.,!?;:()""«»]/g, '');
     const { isAuthenticated, openAuthModal } = useAuthStore();
@@ -58,7 +59,7 @@ export function WordToken({ tokenId, word, fullSentence }: WordTokenProps) {
     const handleSaveWord = (e: React.MouseEvent) => {
         e.stopPropagation();
         if (!isAuthenticated) {
-            openAuthModal();
+            setIsAuthDialogOpen(true);
             return;
         }
 
@@ -66,7 +67,6 @@ export function WordToken({ tokenId, word, fullSentence }: WordTokenProps) {
             addItem({
                 original: cleanWord,
                 translation: translationData?.translation || '—',
-                transcription: translationData?.transcription,
                 contextSentence: fullSentence,
                 sourceLang: targetLanguage,
                 targetLang: 'ru',
@@ -146,29 +146,13 @@ export function WordToken({ tokenId, word, fullSentence }: WordTokenProps) {
             </Popover>
             {' '}
 
-            {/* <Dialog open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen}>
-                <DialogContent className="sm:max-w-[400px]" onClick={(e) => e.stopPropagation()}>
-                    <DialogHeader>
-                        <DialogTitle>Сохранение слов</DialogTitle>
-                        <DialogDescription className="pt-2">
-                            Войдите в аккаунт, чтобы сохранять слова в личный словарь.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter className="gap-2 sm:gap-0 mt-4">
-                        <Button variant="ghost" onClick={() => setIsAuthDialogOpen(false)}>
-                            Отмена
-                        </Button>
-                        <Button
-                            onClick={() => {
-                                login('user@example.com');
-                                setIsAuthDialogOpen(false);
-                            }}
-                        >
-                            Войти
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog> */}
+            <GuestActionModal
+                isOpen={isAuthDialogOpen}
+                onClose={() => setIsAuthDialogOpen(false)}
+                title="Сохранение слова"
+                description="Войдите в аккаунт, чтобы добавить это слово в личный словарь и тренировать его."
+                cancelText="Продолжить чтение"
+            />
         </>
     );
 }

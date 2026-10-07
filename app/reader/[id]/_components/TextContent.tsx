@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { Loader2, Check, Plus, X } from 'lucide-react';
+import { GuestActionModal } from '@/components/auth/GuestActionModal';
 
 interface TextContentProps {
     sentences: Sentence[];
@@ -162,7 +163,7 @@ export const TextContent = ({ sentences }: TextContentProps) => {
                                 'p-4 rounded-xl border transition-all duration-200 cursor-pointer',
                                 'bg-card text-card-foreground hover:bg-muted/60 hover:border-muted-foreground/30',
                                 isActive &&
-                                    'bg-blue-500/10 border-blue-500/40 text-blue-950 dark:text-blue-100 shadow-sm ring-1 ring-blue-500/30 scale-[1.01]'
+                                'bg-blue-500/10 border-blue-500/40 text-blue-950 dark:text-blue-100 shadow-sm ring-1 ring-blue-500/30 scale-[1.01]'
                             )}
                         >
                             <div className="flex items-center justify-between mb-1.5 select-none">
@@ -194,23 +195,13 @@ export const TextContent = ({ sentences }: TextContentProps) => {
                 })}
             </div>
 
-            {/* Диалог авторизации */}
-            <Dialog open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen}>
-                <DialogContent className="sm:max-w-[400px]" onClick={(e) => e.stopPropagation()}>
-                    <DialogHeader>
-                        <DialogTitle>Сохранение фраз</DialogTitle>
-                        <DialogDescription className="pt-2">
-                            Войдите в аккаунт, чтобы сохранять фразы и слова в личный словарь.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter className="gap-2 sm:gap-0 mt-4">
-                        <Button variant="ghost" onClick={() => setIsAuthDialogOpen(false)}>
-                            Отмена
-                        </Button>
-                        <Button onClick={handleOpenFullAuthModal}>Войти</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            <GuestActionModal
+                isOpen={isAuthDialogOpen}
+                onClose={() => setIsAuthDialogOpen(false)}
+                title="Сохранение фразы"
+                description="Войдите в аккаунт, чтобы сохранять готовые выражения из текста."
+                cancelText="Продолжить чтение"
+            />
         </div>
     );
 };

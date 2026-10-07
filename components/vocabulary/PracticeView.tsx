@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, KeyboardEvent } from 'react'
 import { VocabularyItem } from '@/store/useVocabularyStore'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { RotateCw, CheckCircle2 } from 'lucide-react'
+import { highlightWordInContext } from '@/lib/utils'
 
 interface Props {
   items: VocabularyItem[]
@@ -15,27 +16,6 @@ interface Props {
 export function PracticeView({ items, onReview }: Props) {
   const [isFlipped, setIsFlipped] = useState(false)
 
-  // Функция подсветки слова в контексте (как в модалке словаря)
-  const highlightWordInContext = (sentence?: string, word?: string) => {
-    if (!sentence) return null
-    if (!word) return sentence
-
-    const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    const regex = new RegExp(`(${escapedWord})`, 'gi')
-    const parts = sentence.split(regex)
-
-    return parts.map((part, i) =>
-      part.toLowerCase() === word.toLowerCase() ? (
-        <span key={i} className="text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded mx-0.5 inline-block">
-          {part}
-        </span>
-      ) : (
-        part
-      )
-    )
-  }
-
-  // Если массив пуст — сессия завершена
   if (!items || items.length === 0) {
     return (
       <Card className="p-8 text-center max-w-md mx-auto space-y-4">
@@ -55,6 +35,13 @@ export function PracticeView({ items, onReview }: Props) {
     onReview(currentItem.id, decision)
   }
 
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      setIsFlipped((prev) => !prev)
+    }
+  }
+
   return (
     <div className="max-w-xl mx-auto space-y-6">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -63,12 +50,17 @@ export function PracticeView({ items, onReview }: Props) {
       </div>
 
       <div
-        className="relative h-80 w-full cursor-pointer perspective-1000"
+        role="button"
+        tabIndex={0}
+        aria-label="Перевернуть карточку"
+        className="relative h-80 w-full cursor-pointer perspective-1000 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-xl"
         onClick={() => setIsFlipped(!isFlipped)}
+        onKeyDown={handleKeyDown}
       >
         <div
-          className={`relative w-full h-full rounded-xl transition-all duration-500 transform-style-3d ${isFlipped ? 'rotate-y-180' : ''
-            }`}
+          className={`relative w-full h-full rounded-xl transition-all duration-500 transform-style-3d ${
+            isFlipped ? 'rotate-y-180' : ''
+          }`}
         >
           {/* Лицевая сторона */}
           <Card className="absolute inset-0 w-full h-full p-6 flex flex-col justify-between backface-hidden border-2 border-primary/20 bg-card">
@@ -78,17 +70,6 @@ export function PracticeView({ items, onReview }: Props) {
 
             <div className="text-center space-y-3 my-auto">
               <h2 className="text-3xl font-extrabold tracking-tight">{currentItem.original}</h2>
-              {/* Транскрипция для всех языков */}
-              {currentItem.transcription && (
-                <p className="text-sm font-mono text-muted-foreground tracking-wide">
-                  [{currentItem.transcription}]
-                </p>
-              )}
-              {currentItem.contextSentence && (
-                <p className="text-base sm:text-lg leading-relaxed text-foreground font-normal px-2">
-                  &quot;{highlightWordInContext(currentItem.contextSentence, currentItem.original)}&quot;
-                </p>
-              )}
             </div>
 
             <div className="flex items-center justify-center gap-2 text-xs sm:text-sm text-muted-foreground/90 border-t border-border/50 pt-3">
@@ -96,6 +77,7 @@ export function PracticeView({ items, onReview }: Props) {
               <span>Нажмите, чтобы увидеть перевод</span>
             </div>
           </Card>
+
           {/* Обратная сторона */}
           <Card className="absolute inset-0 w-full h-full p-6 flex flex-col justify-between backface-hidden rotate-y-180 border-2 border-emerald-500/30 bg-card">
             <div className="flex justify-between items-center">
@@ -113,7 +95,6 @@ export function PracticeView({ items, onReview }: Props) {
               )}
             </div>
 
-            {/* Пустой блок для сохранения симметрии карточки */}
             <div />
           </Card>
         </div>

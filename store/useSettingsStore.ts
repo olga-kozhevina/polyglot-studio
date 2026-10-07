@@ -1,7 +1,8 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
+import { Language } from '@/types/text'
 
-export type TargetLanguage = 'EN' | 'FR' | 'TR'
+export type TargetLanguage = Language;
 
 interface SettingsState {
   _hasHydrated: boolean;

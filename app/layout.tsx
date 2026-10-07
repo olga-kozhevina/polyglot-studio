@@ -34,21 +34,21 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans">
+      <body className="min-h-screen bg-background font-sans antialiased flex flex-col">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          <div className="relative min-h-screen bg-background">
+          <div className="relative min-h-screen">
             {/* Боковое меню на ПК */}
             <Sidebar />
 
             {/* Основной контентный блок */}
             <div className="md:pl-64 flex flex-col min-h-screen">
               {/* Шапка */}
-              <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur px-3 h-16 flex items-center justify-between md:justify-end gap-2 overflow-hidden">
+              <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur px-3 sm:px-4 h-16 flex items-center justify-between md:justify-end gap-2 overflow-hidden">
                 <Link
                   href="/"
                   className="md:hidden flex items-center gap-2 min-w-0 shrink-0 transition-opacity hover:opacity-80 active:scale-95"
@@ -57,9 +57,10 @@ export default function RootLayout({
                     P
                   </div>
                   <span className="hidden min-[480px]:inline font-bold tracking-tight text-sm leading-tight text-left">
-                    Polyglot<span className=""> Studio</span>
+                    Polyglot Studio
                   </span>
                 </Link>
+
                 <HeaderControls />
               </header>
 
@@ -72,7 +73,7 @@ export default function RootLayout({
             {/* Нижняя навигация для мобильных */}
             <BottomNav />
 
-            {/* 2. Глобальное окно авторизации */}
+            {/* Глобальное окно авторизации */}
             <AuthModal />
           </div>
         </ThemeProvider>

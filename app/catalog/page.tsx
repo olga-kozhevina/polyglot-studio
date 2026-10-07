@@ -1,5 +1,5 @@
 import { getFilteredTexts } from '@/lib/texts';
-import { CatalogView } from '@/components/catalog/catalog-view';
+import { CatalogView } from '@/components/catalog/CatalogView';
 
 export const metadata = {
   title: 'Каталог материалов | Polyglot Studio',

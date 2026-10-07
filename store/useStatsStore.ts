@@ -37,7 +37,14 @@ const getCurrentUserKey = (): string | null => {
   return user?.email ? user.email.toLowerCase().trim() : null;
 };
 
-const getTodayDateStr = () => new Date().toLocaleDateString('en-CA'); // 'YYYY-MM-DD'
+// Надежная генерация YYYY-MM-DD по локальному времени
+const getTodayDateStr = (): string => {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 const defaultLangStats: LangStats = {
   secondsListened: 0,
@@ -56,17 +63,27 @@ const defaultUserStats: UserStats = {
   activityHistory: [],
 };
 
-const calculateStreak = (currentStats: UserStats, today: string): { streak: number; lastActivityDate: string } => {
+const calculateStreak = (
+  currentStats: UserStats,
+  today: string
+): { streak: number; lastActivityDate: string } => {
   const { streak, lastActivityDate } = currentStats;
+
   if (!lastActivityDate) return { streak: 1, lastActivityDate: today };
   if (lastActivityDate === today) return { streak, lastActivityDate: today };
 
   const lastDate = new Date(lastActivityDate);
   const currDate = new Date(today);
-  const diffTime = Math.abs(currDate.getTime() - lastDate.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-  if (diffDays === 1) return { streak: streak + 1, lastActivityDate: today };
+  // Считаем разницу в днях с учетом направления времени (без Math.abs)
+  const diffTime = currDate.getTime() - lastDate.getTime();
+  const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 1) {
+    return { streak: streak + 1, lastActivityDate: today };
+  }
+
+  // Если прошёл больше чем 1 день или дата некорректна (diffDays <= 0)
   return { streak: 1, lastActivityDate: today };
 };
 
@@ -89,7 +106,7 @@ export const useStatsStore = create<StatsState>()(
 
         set((state) => {
           const today = getTodayDateStr();
-          const currentStats = state.userStats[userKey]
+          const currentStats: UserStats = state.userStats[userKey]
             ? JSON.parse(JSON.stringify(state.userStats[userKey]))
             : JSON.parse(JSON.stringify(defaultUserStats));
 
@@ -103,7 +120,9 @@ export const useStatsStore = create<StatsState>()(
 
           currentStats.languages[lang].secondsListened += seconds;
 
-          const todayHistory = currentStats.activityHistory.find((h: DailyActivity) => h.date === today);
+          const todayHistory = currentStats.activityHistory.find(
+            (h: DailyActivity) => h.date === today
+          );
           if (todayHistory) {
             todayHistory.seconds += seconds;
           } else {
@@ -119,7 +138,8 @@ export const useStatsStore = create<StatsState>()(
         if (!userKey || !wordId) return;
 
         set((state) => {
-          const currentStats = state.userStats[userKey]
+          const today = getTodayDateStr();
+          const currentStats: UserStats = state.userStats[userKey]
             ? JSON.parse(JSON.stringify(state.userStats[userKey]))
             : JSON.parse(JSON.stringify(defaultUserStats));
 
@@ -136,6 +156,19 @@ export const useStatsStore = create<StatsState>()(
           if (!langStats.masteredWordIds.includes(wordId)) {
             langStats.masteredWordIds.push(wordId);
             langStats.wordsLearned = langStats.masteredWordIds.length;
+
+            // Пересчитываем стрик при изучении НОВОГО слова
+            const streakData = calculateStreak(currentStats, today);
+            currentStats.streak = streakData.streak;
+            currentStats.lastActivityDate = streakData.lastActivityDate;
+
+            // Гарантируем наличие сегодняшней записи в истории активности
+            const todayHistory = currentStats.activityHistory.find(
+              (h: DailyActivity) => h.date === today
+            );
+            if (!todayHistory) {
+              currentStats.activityHistory.push({ date: today, seconds: 0 });
+            }
           }
 
           return { userStats: { ...state.userStats, [userKey]: currentStats } };

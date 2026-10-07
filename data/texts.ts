@@ -172,7 +172,7 @@ export const TEXT_MATERIALS: TextMaterial[] = [
     level: 'C1',
     category: 'Business',
     tagsRu: ['переработка', 'бизнес', 'экология', 'экономика', 'производство', 'вторсырье', 'промышленность'],
-    duration: 24.5,
+    duration: 18,
     wordCount: 48,
     audioUrl: '/audio/fr-c1-biz-1.mp3',
     sentences: [
