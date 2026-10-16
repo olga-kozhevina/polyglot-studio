@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { fetchTranslation, TranslationResult } from '@/lib/translate';
 import { useVocabularyStore } from '@/store/useVocabularyStore';

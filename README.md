@@ -1,36 +1,111 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🌐 Polyglot Studio
 
-## Getting Started
+> **Интерактивная Frontend-платформа для аудирования и тренировки беглости речи по методике Shadowing (теневого повторения).**  
+> Поддерживает изучение английского, французского и турецкого языков с переводом на русский (уровни B1–C1).
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### 🔗 Ссылки
+* 🚀 **Live Demo:** [Попробовать приложение онлайн](ВСТАВИТЬ_ССЫЛКУ)
+* 📁 **GitHub Repository:** [Исходный код проекта](ВСТАВИТЬ_ССЫЛКУ_НА_РЕПО)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📸 Скриншоты и возможности
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Каталог и фильтрация | Интерактивный ридер и аудио |
+|:---:|:---:|
+| Серверная витрина текстов с фильтрами по уровню и темам | Синхронизация звука с предложениями и всплывающий перевод |
 
-## Learn More
+| 3D-тренажер карточек | Дашборд прогресса |
+|:---:|:---:|
+| Чистый CSS 3D-flip, интервальные статусы слов | Графики активности на Recharts и расчет стрика |
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 💡 О проекте и методологии
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Shadowing (теневое повторение)** — доказанная методика развития разговорных навыков: учащийся слушает речь носителя и с минимальным отставанием проговаривает её вслух, копируя темп, паузы и интонации.
 
-## Deploy on Vercel
+**Polyglot Studio** автоматизирует эту практику:
+* Текст разбит на точные таймкоды предложений.
+* Аудио синхронизировано с визуальной подсветкой и автоскроллом.
+* Любое непонятное слово или идиома переводится в один клик и сохраняется в персональный словарь.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🛠 Технологический стек
+
+* **Фреймворк:** [Next.js](https://nextjs.org/) (App Router, React 19 / Server & Client Components)
+* **Язык:** [TypeScript](https://www.typescriptlang.org/) (Строгая типизация, контракты данных, Generics)
+* **Стилизация:** [Tailwind CSS](https://tailwindcss.com/) + кастомные 3D-утилиты (`perspective`, `preserve-3d`)
+* **UI-компоненты:** [Shadcn UI](https://ui.shadcn.com/) (Radix Primitives: Dialog, Popover, Tabs, Table, Slider)
+* **Глобальный стейт:** [Zustand](https://github.com/pmndrs/zustand) с middleware `persist` и селекторами
+* **Аналитика и графики:** [Recharts](https://recharts.org/)
+* **Темизация:** [next-themes](https://github.com/pacocoursey/next-themes) (светлая / тёмная / системная)
+* **Иконки:** [Lucide React](https://lucide.dev/)
+
+---
+
+## ✨ Ключевой функционал
+
+### 1. Интерактивный плеер и синхронизация (`/reader/[id]`)
+* **HTML5 Audio Engine:** Кастомный плеер с таймлайном, шагом перемотки «-5 сек» для циклической отработки сложных фраз и переключением скорости ($0.75\times$ — $1.5\times$).
+* **DOM & Media Sync:** Кастомный хук `useAudioSync` отслеживает воспроизведение и подсвечивает звучащее предложение, а переключатель **Автопрокрутки** мягко удерживает фокус в центре экрана.
+* **Переход по клику:** Клик на любое предложение мгновенно перематывает аудио на соответствующий таймкод.
+
+### 2. Умный перевод в контексте
+* **Single Word Translation:** Клик по отдельному токену открывает Popover с быстрым переводом через встроенный API-прокси с in-memory кэшированием.
+* **Phrase Selection:** Выделение целой фразы (2+ слов) автоматически определяет границы контекстного предложения через `data-sentence-text` и предлагает перевод составного выражения.
+
+### 3. Словарь и Spaced Repetition карточки (`/vocabulary`)
+* **Конкурентная фильтрация:** Поиск по сотням слов реализован через `useDeferredValue`, исключая лаги при быстром наборе текста.
+* **3D Flip Cards:** Карточки тренировки на чистом CSS (аппаратное ускорение через `transform-style: preserve-3d`).
+* **Гибкая сессия:** Возможность отфильтровать нужный срез слов (например, только новые) и запустить тренировку конкретного списка. Незавершенный «хвост» сессии сохраняется при перезагрузке.
+
+### 4. Аналитика и Дашборд (`/dashboard`)
+* Отслеживание времени прослушивания раздельно по каждому языку (EN, FR, TR).
+* Алгоритм расчёта ежедневной серии занятий (**Daily Streak**).
+* Интерактивный график недельной активности с помощью `Recharts AreaChart`.
+
+### 5. Гостевой режим (Guest Experience)
+* Приложение полностью доступно для ознакомления без логина.
+* Закрытые разделы защищены эстетичным оверлеем с блюром (`GuestFeatureOverlay`), нативно изолированным через атрибут `inert` для доступности (a11y).
+* При логине сессия гостя автоматически мигрирует в профиль пользователя.
+
+---
+
+## 🧠 Инженерные решения и компромиссы (Architecture Trade-offs)
+
+1. **Frontend-Only MVP & Persistence:**  
+   В проекте нет отдельного бэкенда: авторизация эмулируется на клиенте, а данные изолированы по аккаунтам пользователей в `localStorage` через Zustand.
+2. **Борьба с Hydration Mismatch & FOIC:**  
+   Поскольку настройки (язык, сессия) хранятся на клиенте, сервер Next.js изначально генерирует нейтральный HTML. Чтобы исключить визуальное мерцание (*Flash of Incorrect Content*), используется флаг регидратации `_hasHydrated` в связке со Skeleton-заглушками.  
+   *(В production-архитектуре этот механизм оптимизируется переносом текущего языка в HttpOnly Cookies / URL query params для чистого SSR).*
+3. **Производительность React и подписки Zustand:**  
+   Во всех клиентских компонентах используются атомарные селекторы (`state => state.field`), предотвращающие холостые ререндеры при частых событиях плеера (`timeupdate`).
+
+---
+
+## 📂 Структура проекта
+
+```text
+polyglot-studio/
+├── app/                      # Next.js App Router (страницы и layouts)
+│   ├── api/translate/        # API-прокси для перевода с in-memory кэшем
+│   ├── catalog/              # Серверная витрина материалов
+│   ├── dashboard/            # Аналитика и дашборд
+│   ├── reader/[id]/          # Интерактивный плеер и ридер
+│   └── vocabulary/           # Таблица слов и 3D-тренажер
+├── components/               # UI и бизнес-компоненты
+│   ├── auth/                 # Авторизация и модальные окна
+│   ├── catalog/              # Карточки и скелетоны каталога
+│   ├── dashboard/            # Графики и заглушки гостя
+│   ├── layout/               # Шапка, оверлеи и навигация
+│   ├── navigation/           # Сайдбар и нижний мобильный бар
+│   ├── ui/                   # Атомарные Shadcn UI компоненты
+│   └── vocabulary/           # Таблица, фильтры и флип-карточки
+├── hooks/                    # Кастомные хуки (useAudioSync, usePhraseSelection)
+├── store/                    # Zustand-сторы (Auth, Settings, Vocabulary, Reader, Stats)
+├── types/                    # Доменные типы данных TypeScript
+└── lib/                      # Утилиты, алгоритмы форматирования и словарь

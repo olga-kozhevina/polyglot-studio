@@ -58,23 +58,22 @@ const LANGUAGE_LABELS: Record<TargetLanguage, string> = {
 };
 
 export default function DashboardPage() {
-  const { user, _hasHydrated: authHydrated } = useAuthStore();
-  const { _hasHydrated: statsHydrated, getCurrentUserStats } = useStatsStore();
-  const { targetLanguage, _hasHydrated: settingsHydrated } = useSettingsStore();
+  const user = useAuthStore((state) => state.user);
+  const authHydrated = useAuthStore((state) => state._hasHydrated);
+  const statsHydrated = useStatsStore((state) => state._hasHydrated);
+  const settingsHydrated = useSettingsStore((state) => state._hasHydrated);
+  const targetLanguage = useSettingsStore((state) => state.targetLanguage);
 
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   const isFullyHydrated = authHydrated && statsHydrated && settingsHydrated;
-  const userStats = getCurrentUserStats();
+  const userStats = useStatsStore((state) => state.getCurrentUserStats());
 
   const currentLangName = LANGUAGE_LABELS[targetLanguage] || targetLanguage;
 
-  const activityHistoryJSON = JSON.stringify(userStats?.activityHistory || []);
-
   const chartData = useMemo(() => {
     return generateLast7DaysChartData(userStats?.activityHistory);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activityHistoryJSON]);
+  }, [userStats?.activityHistory]);
 
   if (!isFullyHydrated) {
     return <DashboardSkeleton />;

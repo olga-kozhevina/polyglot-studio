@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { useVocabularyStore } from '@/store/useVocabularyStore'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useSettingsStore } from '@/store/useSettingsStore'
-import { useReaderStore } from '@/store/useReaderStore'
 import { GuestEmptyState } from '@/components/vocabulary/GuestEmptyState'
 import { VocabularyTable } from '@/components/vocabulary/VocabularyTable'
 import { PracticeView } from '@/components/vocabulary/PracticeView'
@@ -20,7 +19,9 @@ export default function VocabularyPage() {
   const items = useVocabularyStore((s) => s.items)
   const sessionQueue = useVocabularyStore((s) => s.sessionQueue)
   const syncUserVocabulary = useVocabularyStore((s) => s.syncUserVocabulary)
-  const hasHydrated = useReaderStore((state) => state._hasHydrated);
+  const vocabHydrated = useVocabularyStore((s) => s._hasHydrated);
+  const authHydrated = useAuthStore((s) => s._hasHydrated);
+  const hasHydrated = vocabHydrated && authHydrated;
 
   const addItem = useVocabularyStore((s) => s.addItem)
   const removeItem = useVocabularyStore((s) => s.removeItem)

@@ -41,6 +41,7 @@ export function GuestFeatureOverlay({
       <div 
         className="p-4 xs:p-6 sm:p-8 space-y-6 sm:space-y-8 filter blur-[3px] opacity-50 pointer-events-none select-none transition-all duration-300"
         aria-hidden="true"
+        inert
       >
         {children}
       </div>

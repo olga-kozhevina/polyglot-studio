@@ -23,16 +23,14 @@ export const AudioPlayer = ({ audioUrl }: AudioPlayerProps) => {
     // Строгая типизация таймера, чтобы TS не ругался на NodeJS.Timeout в браузере
     const syncInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
-    const {
-        isPlaying,
-        currentTime,
-        duration,
-        playbackRate,
-        setIsPlaying,
-        setCurrentTime,
-        setDuration,
-        setPlaybackRate,
-    } = useReaderStore();
+    const isPlaying = useReaderStore((state) => state.isPlaying);
+    const currentTime = useReaderStore((state) => state.currentTime);
+    const duration = useReaderStore((state) => state.duration);
+    const playbackRate = useReaderStore((state) => state.playbackRate);
+    const setIsPlaying = useReaderStore((state) => state.setIsPlaying);
+    const setCurrentTime = useReaderStore((state) => state.setCurrentTime);
+    const setDuration = useReaderStore((state) => state.setDuration);
+    const setPlaybackRate = useReaderStore((state) => state.setPlaybackRate);
 
     // --- Получаем данные из сторов ---
     const { targetLanguage } = useSettingsStore();
@@ -50,25 +48,16 @@ export const AudioPlayer = ({ audioUrl }: AudioPlayerProps) => {
         if (!audio) return;
 
         if (isPlaying) {
-            if (audio.currentTime === 0) {
-                audio.currentTime = 0;
-            }
-            const playAudio = async () => {
-                try {
-                    // Проверяем готовность файла (readyState >= 2 означает, что первые кадры загружены)
-                    if (audio.readyState < 2) {
-                        await new Promise((resolve) => {
-                            audio.oncanplaythrough = resolve;
-                        });
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch((error) => {
+                    // Игнорируем штатное прерывание новым запросом на паузу (AbortError)
+                    if (error.name !== 'AbortError') {
+                        console.error('Playback error:', error);
+                        setIsPlaying(false);
                     }
-                    await audio.play();
-                } catch (error) {
-                    console.error('Ошибка воспроизведения:', error);
-                    setIsPlaying(false);
-                }
-            };
-
-            playAudio();
+                });
+            }
         } else {
             audio.pause();
         }
@@ -79,8 +68,8 @@ export const AudioPlayer = ({ audioUrl }: AudioPlayerProps) => {
         if (audioRef.current) {
             audioRef.current.playbackRate = playbackRate;
             if ('preservesPitch' in audioRef.current) {
-      audioRef.current.preservesPitch = true;
-    }
+                audioRef.current.preservesPitch = true;
+            }
         }
     }, [playbackRate]);
 
@@ -90,7 +79,7 @@ export const AudioPlayer = ({ audioUrl }: AudioPlayerProps) => {
             // Если музыка играет, запускаем счетчик
             syncInterval.current = setInterval(() => {
                 accumulatedSeconds.current += 1;
-                
+
                 // Каждые 10 секунд сбрасываем накопленное в стор
                 if (accumulatedSeconds.current >= 10) {
                     addListeningTime(accumulatedSeconds.current, targetLanguage as TargetLanguage);

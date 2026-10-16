@@ -26,7 +26,7 @@ export function CatalogView({ initialMaterials }: CatalogViewProps) {
   const [selectedLevel, setSelectedLevel] = useState<string>('ALL');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
 
-  const { targetLanguage } = useSettingsStore();
+  const targetLanguage = useSettingsStore((state) => state.targetLanguage);
   const hasHydrated = useSettingsStore((state) => state._hasHydrated);
 
   const filteredMaterials = useMemo(() => {
@@ -67,15 +67,8 @@ export function CatalogView({ initialMaterials }: CatalogViewProps) {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
           <Input
             type="search"
-            placeholder="Поиск по темам и русским словам..."
-            className="hidden sm:block pl-9 pr-4 text-sm w-full"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <Input
-            type="search"
             placeholder="Поиск по темам и словам..."
-            className="block sm:hidden pl-9 pr-4 text-sm w-full"
+            className="pl-9 pr-4 text-sm w-full"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />

@@ -1,8 +1,6 @@
 'use client';
 
-import { useState } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
-import { AuthModal } from '@/components/auth/AuthModal';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -16,28 +14,31 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LogOut } from 'lucide-react';
 
 export function UserNav() {
-    const { user, isAuthenticated, logout } = useAuthStore();
-    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+    const user = useAuthStore((s) => s.user);
+    const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+    const logout = useAuthStore((s) => s.logout);
+    const openAuthModal = useAuthStore((s) => s.openAuthModal);
+    const hasHydrated = useAuthStore((s) => s._hasHydrated);
+
+    // Пока стейт читается из localStorage, показываем аккуратную заглушку в размер аватарки
+    if (!hasHydrated) {
+        return <div className="h-9 w-9 rounded-full bg-muted/60 animate-pulse shrink-0" />;
+    }
 
     // Гостевой режим
     if (!isAuthenticated || !user) {
         return (
-            <div suppressHydrationWarning>
-                <Button onClick={() => setIsAuthModalOpen(true)} variant="default"
-                    className='cursor-pointer'>
+            <div>
+                <Button onClick={openAuthModal} variant="default" className="cursor-pointer">
                     Войти
                 </Button>
-                <AuthModal
-                    isOpen={isAuthModalOpen}
-                    onClose={() => setIsAuthModalOpen(false)}
-                />
             </div>
         );
     }
 
     // Авторизованный режим
     return (
-        <div suppressHydrationWarning>
+        <div>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-9 w-9 rounded-full cursor-pointer">

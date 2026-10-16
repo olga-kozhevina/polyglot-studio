@@ -31,7 +31,7 @@ export function useAudioSync({
   );
   const activeId = activeSentence?.id || null;
 
-  // 3. Авто-скролл к активному предложению
+  // Авто-скролл к активному предложению
   useEffect(() => {
     if (!autoScroll || !activeId) return;
 
@@ -44,7 +44,7 @@ export function useAudioSync({
     }
   }, [activeId, autoScroll]);
 
-  // 4. Перемотка аудио на начало предложения при клике
+  // Перемотка аудио на начало предложения при клике
   const seekToSentence = useCallback(
     (startTime: number) => {
       const audioElement = document.querySelector('audio');

@@ -17,27 +17,6 @@ function setCache(key: string, value: TranslationData) {
   translationCache.set(key, value);
 }
 
-async function fetchWithTimeout(
-  url: string,
-  options: RequestInit = {},
-  timeoutMs = 2500
-): Promise<Response> {
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeoutMs);
-
-  try {
-    const response = await fetch(url, {
-      ...options,
-      signal: controller.signal,
-    });
-    clearTimeout(id);
-    return response;
-  } catch (err) {
-    clearTimeout(id);
-    throw err;
-  }
-}
-
 async function translateGoogle(
   text: string,
   from: string,
@@ -48,16 +27,12 @@ async function translateGoogle(
       text
     )}`;
 
-    const res = await fetchWithTimeout(
-      url,
-      {
-        headers: {
-          'User-Agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        },
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 ...',
       },
-      2500
-    );
+      signal: AbortSignal.timeout(2500),
+    });
 
     if (res.ok) {
       const data = await res.json();

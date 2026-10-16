@@ -106,9 +106,9 @@ export const useStatsStore = create<StatsState>()(
 
         set((state) => {
           const today = getTodayDateStr();
-          const currentStats: UserStats = state.userStats[userKey]
-            ? JSON.parse(JSON.stringify(state.userStats[userKey]))
-            : JSON.parse(JSON.stringify(defaultUserStats));
+          const baseStats = state.userStats[userKey] || defaultUserStats;
+          // Используем нативный structuredClone вместо медленного JSON.stringify
+          const currentStats: UserStats = structuredClone(baseStats);
 
           const streakData = calculateStreak(currentStats, today);
           currentStats.streak = streakData.streak;
@@ -178,6 +178,7 @@ export const useStatsStore = create<StatsState>()(
     {
       name: 'polyglot-stats',
       storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({ userStats: state.userStats }),
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },
