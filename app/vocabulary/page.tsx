@@ -39,7 +39,27 @@ export default function VocabularyPage() {
     }
   }, [isAuthenticated, syncUserVocabulary])
 
-  if (!hasHydrated) {
+  // if (!hasHydrated) {
+  //   return (
+  //     <div className="container max-w-6xl py-6 space-y-6">
+  //       <div className="space-y-2">
+  //         <Skeleton className="h-9 w-64" />
+  //         <Skeleton className="h-4 w-48" />
+  //       </div>
+  //       <div className="rounded-xl border p-4 space-y-4 bg-card">
+  //         <Skeleton className="h-10 w-full" />
+  //         <Skeleton className="h-72 w-full" />
+  //       </div>
+  //     </div>
+  //   )
+  // }
+
+  // if (!isAuthenticated) {
+  //   return <GuestEmptyState />
+  // }
+
+  // 1. Ждём только авторизацию (она гидратируется мгновенно)
+  if (!authHydrated) {
     return (
       <div className="container max-w-6xl py-6 space-y-6">
         <div className="space-y-2">
@@ -54,8 +74,25 @@ export default function VocabularyPage() {
     )
   }
 
+  // 2. Если это гость — СРАЗУ показываем заглушку без зависания скелетона
   if (!isAuthenticated) {
     return <GuestEmptyState />
+  }
+
+  // 3. А если пользователь залогинен — ждём загрузку его слов из словаря
+  if (!vocabHydrated) {
+    return (
+      <div className="container max-w-6xl py-6 space-y-6">
+        <div className="space-y-2">
+          <Skeleton className="h-9 w-64" />
+          <Skeleton className="h-4 w-48" />
+        </div>
+        <div className="rounded-xl border p-4 space-y-4 bg-card">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-72 w-full" />
+        </div>
+      </div>
+    )
   }
 
   const filteredItemsByLang = items.filter((item) => item.sourceLang === targetLanguage)
@@ -96,9 +133,9 @@ export default function VocabularyPage() {
         </TabsList>
 
         <TabsContent value="list">
-          <VocabularyTable 
-            items={filteredItemsByLang} 
-            onDelete={removeItem} 
+          <VocabularyTable
+            items={filteredItemsByLang}
+            onDelete={removeItem}
             onStartCustomPractice={handleStartCustomPractice}
             onUpdateStatus={updateItemStatus}
           />
