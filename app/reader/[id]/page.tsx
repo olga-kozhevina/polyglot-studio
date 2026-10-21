@@ -7,6 +7,7 @@ import { AudioPlayer } from './_components/AudioPlayer';
 import { ReaderClientWrapper } from './_components/ReaderClientWrapper';
 import { TextContent } from './_components/TextContent';
 import { MaterialHeader } from './_components/MaterialHeader';
+import { TEXT_MATERIALS } from '@/data/texts';
 
 interface ReaderPageProps {
   params: Promise<{
@@ -72,4 +73,10 @@ export default async function ReaderPage({ params }: ReaderPageProps) {
       </div>
     </ReaderClientWrapper>
   );
+}
+
+export function generateStaticParams() {
+  return TEXT_MATERIALS.map((material) => ({
+    id: material.id,
+  }));
 }

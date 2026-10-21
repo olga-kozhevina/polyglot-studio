@@ -1,9 +1,6 @@
 export interface TranslationResult {
   translation: string;
-  audioUrl?: string;
 }
-
-const translationCache = new Map<string, TranslationResult>();
 
 export async function fetchTranslation(
   text: string,
@@ -15,33 +12,17 @@ export async function fetchTranslation(
 
   const src = sourceLang.toLowerCase();
   const tgt = targetLang.toLowerCase();
-  const cacheKey = `${src}:${tgt}:${cleanText.toLowerCase()}`;
-
-  // 1. Возвращаем мгновенно из кэша (0ms)
-  if (translationCache.has(cacheKey)) {
-    return translationCache.get(cacheKey)!;
-  }
 
   try {
     const res = await fetch(
-      `/api/translate?text=${encodeURIComponent(cleanText)}&from=${src}&to=${tgt}`
+      `https://api.mymemory.translated.net/get?q=${encodeURIComponent(cleanText)}&langpair=${src}|${tgt}`
     );
-
-    if (!res.ok) {
-      return { translation: 'Ошибка перевода' };
-    }
-
+    if (!res.ok) return { translation: 'Ошибка перевода' };
     const data = await res.json();
-    const result: TranslationResult = {
-      translation: data.translation || 'Перевод не найден',
-      audioUrl: data.audioUrl || undefined,
+    return {
+      translation: data.responseData?.translatedText || 'Перевод не найден',
     };
-
-    // 2. Запоминаем в кэше
-    translationCache.set(cacheKey, result);
-    return result;
-  } catch (error) {
-    console.error('Network Translation Error:', error);
+  } catch {
     return { translation: 'Ошибка сети' };
   }
 }
