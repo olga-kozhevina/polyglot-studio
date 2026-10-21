@@ -14,14 +14,12 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export default function VocabularyPage() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const authHydrated = useAuthStore((s) => s._hasHydrated)
   const targetLanguage = useSettingsStore((s) => s.targetLanguage)
 
   const items = useVocabularyStore((s) => s.items)
   const sessionQueue = useVocabularyStore((s) => s.sessionQueue)
   const syncUserVocabulary = useVocabularyStore((s) => s.syncUserVocabulary)
-  const vocabHydrated = useVocabularyStore((s) => s._hasHydrated);
-  const authHydrated = useAuthStore((s) => s._hasHydrated);
-  const hasHydrated = vocabHydrated && authHydrated;
 
   const addItem = useVocabularyStore((s) => s.addItem)
   const removeItem = useVocabularyStore((s) => s.removeItem)
@@ -39,26 +37,7 @@ export default function VocabularyPage() {
     }
   }, [isAuthenticated, syncUserVocabulary])
 
-  // if (!hasHydrated) {
-  //   return (
-  //     <div className="container max-w-6xl py-6 space-y-6">
-  //       <div className="space-y-2">
-  //         <Skeleton className="h-9 w-64" />
-  //         <Skeleton className="h-4 w-48" />
-  //       </div>
-  //       <div className="rounded-xl border p-4 space-y-4 bg-card">
-  //         <Skeleton className="h-10 w-full" />
-  //         <Skeleton className="h-72 w-full" />
-  //       </div>
-  //     </div>
-  //   )
-  // }
-
-  // if (!isAuthenticated) {
-  //   return <GuestEmptyState />
-  // }
-
-  // 1. Ждём только авторизацию (она гидратируется мгновенно)
+  // Ждём, пока стор авторизации прочитает статус из памяти
   if (!authHydrated) {
     return (
       <div className="container max-w-6xl py-6 space-y-6">
@@ -74,30 +53,13 @@ export default function VocabularyPage() {
     )
   }
 
-  // 2. Если это гость — СРАЗУ показываем заглушку без зависания скелетона
+  // Если это гость — СРАЗУ показываем заглушку без зависания скелетона
   if (!isAuthenticated) {
     return <GuestEmptyState />
   }
 
-  // 3. А если пользователь залогинен — ждём загрузку его слов из словаря
-  if (!vocabHydrated) {
-    return (
-      <div className="container max-w-6xl py-6 space-y-6">
-        <div className="space-y-2">
-          <Skeleton className="h-9 w-64" />
-          <Skeleton className="h-4 w-48" />
-        </div>
-        <div className="rounded-xl border p-4 space-y-4 bg-card">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-72 w-full" />
-        </div>
-      </div>
-    )
-  }
-
   const filteredItemsByLang = items.filter((item) => item.sourceLang === targetLanguage)
   const filteredQueueByLang = sessionQueue.filter((item) => item.sourceLang === targetLanguage)
-
   const totalWords = filteredItemsByLang.length
 
   // Обработчик запуска кастомного списка из отфильтрованной таблицы
