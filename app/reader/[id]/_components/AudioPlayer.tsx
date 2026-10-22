@@ -18,6 +18,14 @@ const RATES = [0.75, 1.0, 1.25, 1.5];
 export const AudioPlayer = ({ audioUrl }: AudioPlayerProps) => {
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
+    // Умный резолвер пути: добавляет имя репозитория, если сайт открыт на GitHub Pages
+    const resolvedAudioSrc = (() => {
+        if (typeof window !== 'undefined' && window.location.pathname.startsWith('/polyglot-studio') && !audioUrl.startsWith('/polyglot-studio')) {
+            return `/polyglot-studio${audioUrl.startsWith('/') ? audioUrl : `/${audioUrl}`}`;
+        }
+        return audioUrl;
+    })();
+
     // --- Рефы для статистики ---
     const accumulatedSeconds = useRef(0);
     // Строгая типизация таймера, чтобы TS не ругался на NodeJS.Timeout в браузере
@@ -140,7 +148,7 @@ export const AudioPlayer = ({ audioUrl }: AudioPlayerProps) => {
         <div className="fixed bottom-16 md:bottom-0 left-0 md:left-64 right-0 border-t bg-background/95 backdrop-blur p-3 md:p-4 shadow-lg z-30">
             <audio
                 ref={audioRef}
-                src={audioUrl}
+                src={resolvedAudioSrc}
                 preload="auto"
                 onPlay={() => setIsPlaying(true)}
                 onPause={() => setIsPlaying(false)}
