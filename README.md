@@ -17,7 +17,10 @@ https://github.com/user-attachments/assets/b2cf862f-0034-4320-a54e-ba67b314fdf2
 
 ## 🎬 Демонстрация работы приложения
 
-https://github.com/user-attachments/assets/aaa4235b-0c83-492e-94d6-3b44e04cb588
+<div align="center">
+  <img src="public/video/demo.gif" alt="Polyglot Studio Demo" width="900" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);" />
+  <p><em>(Интерактивный плеер, синхронизация субтитров, всплывающий перевод и 3D-тренажер карточек)</em></p>
+</div>
 
 ---
 

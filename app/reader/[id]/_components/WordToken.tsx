@@ -82,7 +82,7 @@ export function WordToken({ tokenId, word, fullSentence }: WordTokenProps) {
                             // ВАЖНО: Останавливаем всплытие, чтобы клик по слову НЕ запускал аудио у предложения
                             e.stopPropagation();
                         }}
-                        className="cursor-pointer hover:bg-primary/20 hover:text-primary rounded px-0.5 transition-colors inline font-medium"
+                        className="cursor-pointer hover:bg-primary/20 hover:text-primary active:bg-primary/30 active:text-primary active:scale-95 transition-all inline font-medium rounded px-0.5 select-none touch-manipulation"
                     >
                         {word}
                     </span>

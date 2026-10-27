@@ -9,7 +9,7 @@ export function BottomNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 border-t bg-card/95 backdrop-blur z-50 pb-[env(safe-area-inset-bottom)]">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 border-t border-border/80 bg-background/95 backdrop-blur-md shadow-[0_-4px_20px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.4)] z-50 pb-[env(safe-area-inset-bottom)]">
       <div className="flex items-center justify-between h-16 px-1">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon

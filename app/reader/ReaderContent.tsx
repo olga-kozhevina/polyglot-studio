@@ -167,9 +167,6 @@ export default function ReaderContent() {
                   <History className="w-5 h-5 text-primary" />
                   История изученных текстов ({targetLanguage})
                 </h2>
-                <Button asChild variant="ghost" size="sm">
-                  <Link href="/profile">В личный кабинет →</Link>
-                </Button>
               </div>
 
               {targetSessions.length > 0 ? (
